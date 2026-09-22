@@ -21,7 +21,8 @@ export function MemberPicker({
             onClick={() => onToggle(user.id)}
             aria-pressed={active}
             className={cn(
-              'flex items-center gap-2 rounded-full border-2 px-3 py-1.5 font-display text-sm font-semibold transition-all',
+              'flex items-center gap-2 rounded-full border-2 px-3 py-1.5 font-display text-sm font-semibold transition',
+              'focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none',
               active
                 ? 'border-transparent text-white shadow-md'
                 : 'border-ink/10 bg-white text-ink-soft hover:border-ink/25',

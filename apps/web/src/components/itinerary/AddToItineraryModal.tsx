@@ -20,6 +20,7 @@ export function AddToItineraryModal({
   const add = useItineraryStore((s) => s.add)
 
   const lastDay = Math.max(1, view.days.reduce((m, d) => Math.max(m, d.day_number), 0))
+  const dayOptions = Array.from({ length: Math.max(lastDay + 2, 8) }, (_, i) => i + 1)
   const [day, setDay] = useState(1)
   const [submitting, setSubmitting] = useState(false)
 
@@ -65,15 +66,16 @@ export function AddToItineraryModal({
         <p className="text-sm font-medium text-ink-soft">
           ¿En qué día del viaje entra esta joyita? Elegí el número y la ubicamos.
         </p>
-        <div className="flex flex-wrap gap-2">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Elegir día del itinerario">
+          {dayOptions.map((d) => (
             <button
               key={d}
               type="button"
               onClick={() => setDay(d)}
               aria-pressed={day === d}
               className={
-                'h-11 min-w-11 rounded-2xl border-2 px-3 font-display text-lg font-bold transition-all ' +
+                'h-11 min-w-11 rounded-2xl border-2 px-3 font-display text-lg font-bold transition ' +
+                'focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none ' +
                 (day === d
                   ? 'scale-[1.05] border-transparent bg-ink text-white shadow-md'
                   : 'border-ink/10 bg-white text-ink-soft hover:border-ink/30')

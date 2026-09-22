@@ -11,6 +11,7 @@ export interface ModalProps {
   children: ReactNode
   footer?: ReactNode
   size?: 'sm' | 'md' | 'lg'
+  ariaLabel?: string
 }
 
 const sizes = {
@@ -19,7 +20,7 @@ const sizes = {
   lg: 'sm:max-w-2xl',
 }
 
-export function Modal({ open, onClose, title, emoji, children, footer, size = 'md' }: ModalProps) {
+export function Modal({ open, onClose, title, emoji, children, footer, size = 'md', ariaLabel }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -27,7 +28,29 @@ export function Modal({ open, onClose, title, emoji, children, footer, size = 'm
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const panel = panelRef.current
+      if (!panel) return
+      const focusables = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute('disabled'))
+      if (focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement
+      if (e.shiftKey && (active === first || !panel.contains(active))) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && (active === last || !panel.contains(active))) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     document.addEventListener('keydown', onKey)
     const prevFocus = document.activeElement as HTMLElement | null
@@ -56,7 +79,7 @@ export function Modal({ open, onClose, title, emoji, children, footer, size = 'm
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-label={title}
+            aria-label={ariaLabel ?? title}
             tabIndex={-1}
             className={cn(
               'relative flex w-full flex-col rounded-t-[28px] bg-white shadow-card-lg outline-none',
@@ -76,12 +99,12 @@ export function Modal({ open, onClose, title, emoji, children, footer, size = 'm
               <button
                 onClick={onClose}
                 aria-label="Cerrar"
-                className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-lg text-ink-soft transition-colors hover:bg-ink/10"
+                className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-lg text-ink-soft transition-colors hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
               >
                 ✕
               </button>
             </div>
-            <div className="overflow-y-auto px-5 py-3">{children}</div>
+            <div className="overflow-y-auto overscroll-contain px-5 py-3">{children}</div>
             {footer && (
               <div className="border-t border-ink/5 px-5 py-4">{footer}</div>
             )}

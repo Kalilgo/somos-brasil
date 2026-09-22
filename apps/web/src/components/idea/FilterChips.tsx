@@ -27,7 +27,8 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 font-display text-sm font-bold transition-all',
+        'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 font-display text-sm font-bold transition',
+        'focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none',
         active ? 'text-white shadow-md' : 'bg-white text-ink-soft hover:text-ink border-2 border-ink/10',
       )}
       style={active && color ? { backgroundColor: color } : undefined}
@@ -44,7 +45,11 @@ export function FilterChips() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5">
+      <div
+        role="group"
+        aria-label="Filtrar por categoría"
+        className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5"
+      >
         <Chip active={filters.category === 'all'} onClick={() => setFilter({ category: 'all' })} color="#33201a">
           🧺 Todo
         </Chip>
@@ -61,8 +66,12 @@ export function FilterChips() {
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <div className="flex flex-wrap gap-2">
+      <div
+        className="flex flex-wrap items-center justify-between gap-2.5"
+        role="group"
+        aria-label="Filtrar por estado y orden"
+      >
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por estado">
           <Chip active={filters.status === 'all'} onClick={() => setFilter({ status: 'all' })}>
             Todos los estados
           </Chip>
@@ -84,9 +93,10 @@ export function FilterChips() {
         <label className="flex items-center gap-1.5 font-display text-sm font-semibold text-ink-soft">
           Orden
           <select
+            name="sort"
             value={filters.sort}
             onChange={(e) => setFilter({ sort: e.target.value as SortKey })}
-            className="cursor-pointer rounded-full border-2 border-ink/10 bg-white px-3 py-1.5 font-display text-sm font-bold text-ink outline-none focus:border-coral"
+            className="cursor-pointer rounded-full border-2 border-ink/10 bg-white px-3 py-1.5 font-display text-sm font-bold text-ink outline-none focus-visible:ring-2 focus-visible:ring-coral/70 focus:border-coral"
           >
             {sortOptions.map((o) => (
               <option key={o.value} value={o.value}>

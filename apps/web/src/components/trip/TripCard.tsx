@@ -53,7 +53,7 @@ export function TripCard({ trip }: { trip: Trip }) {
 
 function CardClickableInner({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-full rounded-3xl border border-ink/5 bg-white p-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-lg">
+    <div className="h-full rounded-3xl border border-ink/5 bg-white p-5 shadow-card transition duration-200 hover:-translate-y-0.5 hover:shadow-card-lg">
       {children}
     </div>
   )

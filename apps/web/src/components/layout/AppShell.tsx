@@ -13,8 +13,14 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-dvh flex-col">
+      <a
+        href="#contenido"
+        className="fixed left-4 top-4 z-[70] -translate-y-24 rounded-full bg-ink px-4 py-2 font-display text-sm font-bold text-white shadow-card-lg transition-transform focus:translate-y-0 focus-visible:outline-none"
+      >
+        Saltar al contenido
+      </a>
       <AppHeader />
-      <div className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-5 sm:pb-12">
+      <div id="contenido" className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-5 sm:pb-12">
         <Outlet />
       </div>
       <Toaster />

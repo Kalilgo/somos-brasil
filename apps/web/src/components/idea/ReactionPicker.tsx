@@ -30,6 +30,7 @@ export function ReactionPicker({ counts, myVote, onVote, disabled }: ReactionPic
             className={cn(
               'flex min-w-11 items-center justify-center gap-1.5 rounded-full border-2 px-3 py-1.5 font-display text-base transition-colors',
               'disabled:pointer-events-none disabled:opacity-50',
+              'focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none',
               active
                 ? 'border-transparent bg-ink text-white shadow-md'
                 : 'border-ink/10 bg-white hover:border-ink/30',

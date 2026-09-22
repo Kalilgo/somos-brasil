@@ -82,9 +82,9 @@ export function CommentsSection({ ideaId }: { ideaId: string }) {
               </div>
             </li>
           ))}
-          <div ref={listEndRef} />
         </ul>
       )}
+      <div ref={listEndRef} aria-hidden className="h-0" />
 
       <form
         className="flex items-center gap-2"
@@ -98,9 +98,11 @@ export function CommentsSection({ ideaId }: { ideaId: string }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           maxLength={500}
-          placeholder="Decile algo al grupo..."
+          name="comment"
+          autoComplete="off"
+          placeholder="Decile algo al grupo…"
           aria-label="Nuevo comentario"
-          className="h-10 flex-1 rounded-full border-2 border-ink/10 bg-white px-4 text-sm font-medium outline-none transition-colors placeholder:text-ink/30 focus:border-coral"
+          className="h-10 flex-1 rounded-full border-2 border-ink/10 bg-white px-4 text-sm font-medium outline-none transition-colors placeholder:text-ink/30 focus:border-coral focus-visible:ring-2 focus-visible:ring-coral/40"
         />
         <Button type="submit" size="sm" disabled={!text.trim() || posting} loading={posting}>
           Enviar

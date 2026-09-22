@@ -72,8 +72,9 @@ export function TripSummary() {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-2xl font-extrabold text-ink">💰 Resumen del viaje</h2>
         <button
+          type="button"
           onClick={copySummary}
-          className="rounded-full bg-ink px-4 py-2 font-display text-sm font-bold text-white transition-transform active:scale-95"
+          className="rounded-full bg-ink px-4 py-2 font-display text-sm font-bold text-white transition-transform active:scale-95 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:ring-offset-2 focus-visible:ring-offset-cream focus-visible:outline-none"
         >
           📋 Copiar para el grupo
         </button>

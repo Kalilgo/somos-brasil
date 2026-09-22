@@ -93,8 +93,10 @@ export function IdeaCard({ idea }: { idea: IdeaWithRelations }) {
               <img
                 src={idea.image_url}
                 alt=""
+                width={400}
+                height={225}
                 loading="lazy"
-                className="mt-3 h-44 w-full rounded-2xl object-cover"
+                className="mt-3 aspect-video h-auto w-full rounded-2xl object-cover"
                 onError={(e) => {
                   ;(e.target as HTMLImageElement).style.display = 'none'
                 }}
@@ -111,7 +113,7 @@ export function IdeaCard({ idea }: { idea: IdeaWithRelations }) {
                     href={idea.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-xl bg-sky/12 px-3 py-1.5 font-display text-sm font-bold text-sky transition-colors hover:bg-sky/25"
+                    className="rounded-xl bg-sky/12 px-3 py-1.5 font-display text-sm font-bold text-sky transition-colors hover:bg-sky/25 focus-visible:ring-2 focus-visible:ring-sky/60 focus-visible:outline-none"
                   >
                     🔗 Ver referencia ↗
                   </a>
@@ -130,7 +132,7 @@ export function IdeaCard({ idea }: { idea: IdeaWithRelations }) {
               {idea.status === 'confirmed' && !idea.in_itinerary && (
                 <button
                   onClick={() => setAddToItineraryOpen(true)}
-                  className="rounded-full bg-verde px-3 py-1.5 font-display text-xs font-bold text-white transition-transform active:scale-95"
+                  className="rounded-full bg-verde px-3 py-1.5 font-display text-xs font-bold text-white transition-transform active:scale-95 focus-visible:ring-2 focus-visible:ring-verde/60 focus-visible:outline-none"
                 >
                   + Itinerario 🗓️
                 </button>
@@ -139,7 +141,7 @@ export function IdeaCard({ idea }: { idea: IdeaWithRelations }) {
                 onClick={() => setCommentsOpen((o) => !o)}
                 aria-expanded={commentsOpen}
                 className={cn(
-                  'rounded-full px-3 py-1.5 font-display text-xs font-bold transition-colors',
+                  'rounded-full px-3 py-1.5 font-display text-xs font-bold transition-colors focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none',
                   commentsOpen ? 'bg-ink text-white' : 'bg-ink/10 text-ink-soft hover:bg-ink/20',
                 )}
               >
@@ -148,7 +150,7 @@ export function IdeaCard({ idea }: { idea: IdeaWithRelations }) {
               <button
                 onClick={() => setPendingDelete(true)}
                 aria-label="Eliminar idea"
-                className="rounded-full p-2 text-ink-soft transition-colors hover:bg-danger/10 hover:text-danger"
+                className="rounded-full p-2 text-ink-soft transition-colors hover:bg-danger/10 hover:text-danger focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:outline-none"
               >
                 🗑️
               </button>

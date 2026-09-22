@@ -122,7 +122,10 @@ export function Ranking() {
               <div className="flex items-center gap-2">
                 <p className="font-display font-bold text-ink">{row.name}</p>
                 {row.streak_days > 0 && (
-                  <span className="text-xs" title="Racha de días activos">🔥 {row.streak_days}</span>
+                  <span className="text-xs">
+                    🔥 {row.streak_days}
+                    <span className="sr-only"> días de racha</span>
+                  </span>
                 )}
               </div>
               <ProgressBar value={(row.score / maxScore) * 100} color={row.color} className="mt-1.5" />
@@ -183,7 +186,6 @@ function BadgesBoard({ result }: { result: LeaderboardResult }) {
                   {badges.map((b) => (
                     <li
                       key={b.badge_id}
-                      title={`${b.badge?.name}: ${b.badge?.criteria}`}
                       className="flex items-center gap-1.5 rounded-full px-3 py-1 font-display text-xs font-bold"
                       style={
                         b.badge
@@ -193,6 +195,7 @@ function BadgesBoard({ result }: { result: LeaderboardResult }) {
                     >
                       <span aria-hidden>{b.badge?.emoji}</span>
                       {b.badge?.name}
+                      {b.badge?.criteria && <span className="sr-only">: {b.badge.criteria}</span>}
                     </li>
                   ))}
                 </ul>

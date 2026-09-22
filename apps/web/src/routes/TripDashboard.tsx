@@ -156,7 +156,7 @@ function Step({ emoji, text, onClick }: { emoji: string; text: string; onClick: 
     <li>
       <button
         onClick={onClick}
-        className="flex w-full items-center gap-3 rounded-2xl border-2 border-transparent bg-ink/4 px-3.5 py-3 text-left font-semibold text-ink transition-all hover:border-coral/40 hover:bg-ink/8 active:scale-[0.99]"
+        className="flex w-full items-center gap-3 rounded-2xl border-2 border-transparent bg-ink/4 px-3.5 py-3 text-left font-semibold text-ink transition hover:border-coral/40 hover:bg-ink/8 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
       >
         <span className="text-xl" aria-hidden>{emoji}</span>
         <span className="flex-1 text-sm">{text}</span>

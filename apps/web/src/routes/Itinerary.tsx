@@ -157,39 +157,41 @@ export function Itinerary() {
                       <div className="flex shrink-0 flex-col items-end gap-1">
                         <div className="flex gap-1">
                           <button
-                            onClick={() => void swapWithinDay(item, -1)}
-                            aria-label="Subir"
-                            className="grid h-7 w-7 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10"
-                          >
-                            ↑
-                          </button>
-                          <button
-                            onClick={() => void swapWithinDay(item, 1)}
-                            aria-label="Bajar"
-                            className="grid h-7 w-7 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10"
-                          >
-                            ↓
-                          </button>
-                          <button
-                            onClick={() => void remove(item.id).catch(() => {})}
-                            aria-label="Sacar del itinerario"
-                            className="grid h-7 w-7 place-items-center rounded-lg bg-danger/10 text-sm text-danger hover:bg-danger/20"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                        <select
-                          aria-label={`Mover ${item.idea?.title ?? ''} a otro día`}
-                          value={item.day_number}
-                          onChange={(e) => void moveToDay(item, Number(e.target.value))}
-                          className="cursor-pointer rounded-lg border border-ink/10 bg-white px-2 py-1 text-xs font-bold text-ink-soft outline-none focus:border-coral"
+                          onClick={() => void swapWithinDay(item, -1)}
+                          aria-label="Subir"
+                          className="grid h-7 w-7 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
                         >
-                          {[1, 2, 3, 4, 5, 6, 7, 8].map((d) => (
-                            <option key={d} value={d}>
-                              Día {d}
-                            </option>
-                          ))}
-                        </select>
+                          ↑
+                        </button>
+                        <button
+                          onClick={() => void swapWithinDay(item, 1)}
+                          aria-label="Bajar"
+                          className="grid h-7 w-7 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+                        >
+                          ↓
+                        </button>
+                        <button
+                          onClick={() => void remove(item.id).catch(() => {})}
+                          aria-label="Sacar del itinerario"
+                          className="grid h-7 w-7 place-items-center rounded-lg bg-danger/10 text-sm text-danger hover:bg-danger/20 focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:outline-none"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <select
+                        aria-label={`Mover ${item.idea?.title ?? ''} a otro día`}
+                        name="move-day"
+                        autoComplete="off"
+                        value={item.day_number}
+                        onChange={(e) => void moveToDay(item, Number(e.target.value))}
+                        className="cursor-pointer rounded-lg border border-ink/10 bg-white px-2 py-1 text-xs font-bold text-ink-soft outline-none focus-visible:ring-2 focus-visible:ring-coral/70 focus:border-coral"
+                      >
+                        {view.days.map((d) => (
+                          <option key={d.day_number} value={d.day_number}>
+                            Día {d.day_number}
+                          </option>
+                        ))}
+                      </select>
                       </div>
                     </motion.li>
                   )

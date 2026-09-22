@@ -6,7 +6,7 @@ export function Card({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
     <div
       className={cn(
         'rounded-3xl border border-ink/5 bg-white shadow-card',
-        'transition-all duration-200',
+        'transition duration-200',
         className,
       )}
       {...rest}

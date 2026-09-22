@@ -19,8 +19,8 @@ export function ProgressBar({
       className={cn('h-2.5 w-full overflow-hidden rounded-full bg-ink/8', className)}
     >
       <div
-        className="h-full rounded-full transition-all duration-500"
-        style={{ width: `${clamped}%`, backgroundColor: color }}
+        className="h-full origin-left rounded-full transition-transform duration-500"
+        style={{ transform: `scaleX(${clamped / 100})`, backgroundColor: color }}
       />
     </div>
   )

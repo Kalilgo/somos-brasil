@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -13,6 +13,12 @@ import { repo } from '@/lib/data'
 import type { DataRepo as Data } from '@/lib/data/types'
 import type { Trip } from '@/types/db'
 
+interface FieldErrors {
+  name?: string
+  members?: string
+  dates?: string
+}
+
 export function CreateTripModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navigate = useNavigate()
   const createTrip = useTripsStore((s) => s.createTrip)
@@ -26,7 +32,7 @@ export function CreateTripModal({ open, onClose }: { open: boolean; onClose: () 
   const [memberIds, setMemberIds] = useState<string[]>([])
   const [users, setUsers] = useState<Awaited<ReturnType<Data['listUsers']>>>([])
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<FieldErrors>({})
 
   useEffect(() => {
     if (open) {
@@ -36,7 +42,7 @@ export function CreateTripModal({ open, onClose }: { open: boolean; onClose: () 
       setStartDate('')
       setEndDate('')
       setCurrency('USD')
-      setError('')
+      setErrors({})
       if (currentUser) setMemberIds([currentUser.id])
       repo()
         .listUsers()
@@ -46,25 +52,24 @@ export function CreateTripModal({ open, onClose }: { open: boolean; onClose: () 
   }, [open, currentUser])
 
   const selectedCount = memberIds.length
-  const valid = name.trim().length >= 2 && selectedCount >= 2
 
   const minEnd = startDate || undefined
-  const rangeOk = useMemo(() => {
-    if (!startDate || !endDate) return true
-    return new Date(startDate) <= new Date(endDate)
-  }, [startDate, endDate])
+  const rangeOk =
+    !startDate || !endDate ? true : new Date(startDate).getTime() <= new Date(endDate).getTime()
 
   const submit = async () => {
+    const next: FieldErrors = {}
     if (name.trim().length < 2) {
-      setError('El viaje necesita un nombre con onda (mínimo 2 letras).')
-      return
+      next.name = 'El viaje necesita un nombre con onda (mínimo 2 letras).'
     }
     if (selectedCount < 2) {
-      setError('Sumá al menos unx amigx más: ¡un viaje no es viaje en solitario! (bueno, casi).')
-      return
+      next.members = 'Sumá al menos unx amigx más: ¡un viaje no es viaje en solitario! (bueno, casi).'
     }
     if (!rangeOk) {
-      setError('El start no puede ser después del end, papá.')
+      next.dates = 'Las fechas no cierran: el comienzo va antes del final.'
+    }
+    if (next.name || next.members || next.dates) {
+      setErrors(next)
       return
     }
     setSubmitting(true)
@@ -96,7 +101,7 @@ export function CreateTripModal({ open, onClose }: { open: boolean; onClose: () 
       emoji="🧳"
       footer={
         <div className="flex flex-col gap-2 sm:flex-row-reverse">
-          <Button onClick={submit} loading={submitting} disabled={!valid && !error}>
+          <Button onClick={submit} loading={submitting}>
             Crear viaje 🎉
           </Button>
           <Button variant="secondary" onClick={onClose}>
@@ -109,24 +114,29 @@ export function CreateTripModal({ open, onClose }: { open: boolean; onClose: () 
         <Input
           label="Nombre"
           placeholder="Brasil 2026: Carnaval"
+          name="trip-name"
+          autoComplete="off"
           value={name}
           maxLength={80}
+          error={errors.name}
           onChange={(e) => {
             setName(e.target.value)
-            setError('')
+            setErrors((prev) => ({ ...prev, name: undefined }))
           }}
         />
         <TextArea
           label="Descripción"
           hint="¿A dónde tiraría? ¿Qué onda grupal? Ojo, acá se puede bardear un poco."
-          placeholder="Gran candidato: Recife + Olinda en carnaval..."
+          placeholder="Gran candidato: Recife + Olinda en carnaval…"
+          name="trip-description"
+          autoComplete="off"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
         <div className="grid gap-4 sm:grid-cols-3">
-          <Input label="Fechas (desde)" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-          <Input label="Hasta" type="date" min={minEnd} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-          <Select label="Moneda 💵" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+          <Input label="Fechas (desde)" type="date" name="start-date" autoComplete="off" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          <Input label="Hasta" type="date" min={minEnd} name="end-date" autoComplete="off" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          <Select label="Moneda 💵" name="currency" autoComplete="off" value={currency} onChange={(e) => setCurrency(e.target.value)}>
             {CURRENCIES.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -134,7 +144,7 @@ export function CreateTripModal({ open, onClose }: { open: boolean; onClose: () 
             ))}
           </Select>
         </div>
-        {!rangeOk && <p className="text-sm font-medium text-danger">Las fechas no cierran: el comienzo va antes del final.</p>}
+        {errors.dates && <p className="text-sm font-medium text-danger">{errors.dates}</p>}
 
         <div>
           <span className="mb-1.5 block font-display text-sm font-semibold text-ink">
@@ -143,15 +153,15 @@ export function CreateTripModal({ open, onClose }: { open: boolean; onClose: () 
           <MemberPicker
             users={users}
             selected={memberIds}
-            onToggle={(id) =>
+            onToggle={(id) => {
+              setErrors((prev) => ({ ...prev, members: undefined }))
               setMemberIds((prev) =>
                 prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
               )
-            }
+            }}
           />
+          {errors.members && <p className="mt-1.5 text-sm font-medium text-danger">{errors.members}</p>}
         </div>
-
-        {error && <p className="font-display text-sm font-semibold text-danger">{error}</p>}
       </div>
     </Modal>
   )

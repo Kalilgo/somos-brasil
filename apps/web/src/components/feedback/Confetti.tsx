@@ -1,7 +1,12 @@
 import confetti from 'canvas-confetti'
 import { palette } from '@/styles/theme'
 
+function prefersReducedMotion(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
 export function fireCelebration(bursts = 2) {
+  if (prefersReducedMotion()) return
   const colors = [palette.coral, palette.verde, palette.mango, palette.sky, palette.grape]
   const defaults = { spread: 70, ticks: 160, gravity: 0.9, colors, scalar: 1.1 }
 
@@ -14,6 +19,7 @@ export function fireCelebration(bursts = 2) {
 }
 
 export function fireMiniConfetti() {
+  if (prefersReducedMotion()) return
   const colors = [palette.coral, palette.verde, palette.mango, palette.sky]
   confetti({
     particleCount: 40,

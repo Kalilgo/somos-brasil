@@ -25,7 +25,7 @@ export function ConfirmDialog({
   tone = 'primary',
 }: ConfirmDialogProps) {
   return (
-    <Modal open={open} onClose={onClose} size="sm">
+    <Modal open={open} onClose={onClose} size="sm" ariaLabel={title}>
       <div className="flex flex-col items-center py-3 text-center">
         <span className="mb-3 text-5xl" aria-hidden>
           {emoji}

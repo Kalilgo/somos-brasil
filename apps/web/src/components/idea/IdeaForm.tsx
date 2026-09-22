@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
-import { Input, TextArea } from '@/components/ui/forms'
+import { Input, Select, TextArea } from '@/components/ui/forms'
 import { CURRENCIES } from '@/lib/utils/constants'
 import { useIdeasStore } from '@/lib/state/ideas'
 import { useTripsStore } from '@/lib/state/trips'
@@ -16,6 +16,12 @@ interface IdeaFormProps {
   onClose: () => void
   tripId: string
   defaultCategory?: string
+}
+
+export interface FieldErrors {
+  title?: string
+  price?: string
+  url?: string
 }
 
 function validUrl(value: string): boolean {
@@ -41,7 +47,7 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
   const [link, setLink] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<FieldErrors>({})
 
   useEffect(() => {
     if (!open) return
@@ -51,7 +57,7 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
     setPrice('')
     setLink('')
     setImageUrl('')
-    setError('')
+    setErrors({})
     const fallback =
       categories.find((c) => c.slug === defaultCategory || c.id === defaultCategory) ?? categories[0]
     setCategoryId(fallback?.id ?? '')
@@ -64,16 +70,18 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
 
   const submit = async () => {
     if (!currentUser) return
+    const next: FieldErrors = {}
     if (title.trim().length < 3) {
-      setError('El título necesita al menos 3 caracteres. ¡Poné onda!')
-      return
+      next.title = 'El título necesita al menos 3 caracteres. ¡Poné onda!'
     }
     if (!priceOk) {
-      setError('El precio tiene que ser un número ≥ 0, o dejalo vacío si recién lo averiguás.')
-      return
+      next.price = 'El precio tiene que ser un número ≥ 0, o dejalo vacío si recién lo averiguás.'
     }
     if (!urlOk) {
-      setError('Esos links no son URLs válidas (empezá con http:// o https://).')
+      next.url = 'Esos links no son URLs válidas (empezá con http:// o https://).'
+    }
+    if (next.title || next.price || next.url) {
+      setErrors(next)
       return
     }
 
@@ -119,8 +127,8 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
       }
     >
       <div className="flex flex-col gap-4">
-        <div>
-          <span className="mb-2 block font-display text-sm font-semibold text-ink">Categoría</span>
+        <fieldset>
+          <legend className="mb-2 block font-display text-sm font-semibold text-ink">Categoría</legend>
           <div className="flex flex-wrap gap-2">
             {categories.map((c: Category) => (
               <button
@@ -129,7 +137,8 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
                 onClick={() => setCategoryId(c.id)}
                 aria-pressed={categoryId === c.id}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 font-display text-sm font-semibold transition-all',
+                  'flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 font-display text-sm font-semibold transition',
+                  'focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none',
                   categoryId === c.id
                     ? 'scale-[1.03] border-transparent text-white shadow-md'
                     : 'border-ink/10 bg-white text-ink-soft hover:border-ink/30',
@@ -141,21 +150,26 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
               </button>
             ))}
           </div>
-        </div>
+        </fieldset>
 
         <Input
           label="Título"
           placeholder="Airbnb en Olinda frente al mar"
+          name="idea-title"
+          autoComplete="off"
           maxLength={120}
           value={title}
+          error={errors.title}
           onChange={(e) => {
             setTitle(e.target.value)
-            setError('')
+            setErrors((prev) => ({ ...prev, title: undefined }))
           }}
         />
         <TextArea
           label="Descripción"
-          hint="Detalles, por qué la propone, para quién sirve..."
+          hint="Detalles, por qué la propone, para quién sirve…"
+          name="idea-description"
+          autoComplete="off"
           maxLength={1000}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -165,43 +179,61 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
           <Input
             label="Precio"
             type="number"
+            name="idea-price"
+            inputMode="decimal"
+            autoComplete="off"
             min={0}
             step="any"
             placeholder="860"
             value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            error={errors.price}
+            onChange={(e) => {
+              setPrice(e.target.value)
+              setErrors((prev) => ({ ...prev, price: undefined }))
+            }}
           />
-          <div className="col-span-1">
-            <span className="mb-1.5 block font-display text-sm font-semibold text-ink">Moneda</span>
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as Currency)}
-              className="h-[46px] w-full cursor-pointer rounded-2xl border-2 border-ink/10 bg-white px-4 font-medium outline-none transition-colors focus:border-coral"
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Moneda"
+            name="currency"
+            autoComplete="off"
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value as Currency)}
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
           <Input
             label="Link de referencia"
-            placeholder="https://..."
+            type="url"
+            name="idea-link"
+            autoComplete="url"
+            placeholder="https://…"
             value={link}
-            onChange={(e) => setLink(e.target.value)}
+            error={errors.url && link.trim() !== '' ? errors.url : undefined}
+            onChange={(e) => {
+              setLink(e.target.value)
+              setErrors((prev) => ({ ...prev, url: undefined }))
+            }}
           />
         </div>
 
         <Input
           label="Imagen (URL)"
           hint="Opcional: pegá una URL de imagen para darle vida"
-          placeholder="https://.../foto.jpg"
+          type="url"
+          name="idea-image"
+          autoComplete="off"
+          placeholder="https://…/foto.jpg"
           value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
+          error={errors.url && link.trim() === '' ? errors.url : undefined}
+          onChange={(e) => {
+            setImageUrl(e.target.value)
+            setErrors((prev) => ({ ...prev, url: undefined }))
+          }}
         />
-
-        {error && <p className="font-display text-sm font-semibold text-danger">{error}</p>}
       </div>
     </Modal>
   )
