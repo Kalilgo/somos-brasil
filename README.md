@@ -19,7 +19,8 @@ Sin credenciales de Supabase la app arranca en **modo demo**: datos de ejemplo e
 (todos los cambios viven en localStorage). Para usar el backend real:
 
 1. Creá un proyecto en Supabase y aplicá las migraciones de `supabase/migrations/` (via `supabase db push` o la consola).
-2. Copiá `apps/web/.env.example` a `apps/web/.env.local` y completá `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
+2. Desplegá las edge functions: `supabase functions deploy` (son públicas, `verify_jwt = false`).
+3. Copiá `apps/web/.env.example` a `apps/web/.env.local` y completá `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (la publishable key de proyectos nuevos también funciona como `ANON_KEY`).
 
 ## Scripts
 
