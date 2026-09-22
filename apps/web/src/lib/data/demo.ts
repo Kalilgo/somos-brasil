@@ -52,6 +52,7 @@ export const DEMO_CATEGORIES: Category[] = [
   { id: 'c_comida', slug: 'comida', name: 'Comida y bares', emoji: '🍹', color: '#FF4D6D', sort_order: 5 },
   { id: 'c_actividades', slug: 'actividades', name: 'Actividades', emoji: '🎸', color: '#FF5A5F', sort_order: 6 },
   { id: 'c_extras', slug: 'extras', name: 'Gastos varios', emoji: '🎒', color: '#6F5F57', sort_order: 7 },
+  { id: 'c_otro', slug: 'otro', name: 'Otro', emoji: '🎲', color: '#8B8B93', sort_order: 8 },
 ]
 
 export const DEMO_BADGES: Badge[] = [
