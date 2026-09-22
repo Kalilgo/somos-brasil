@@ -75,10 +75,15 @@ export function UserSelector() {
   }
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col overflow-x-clip bg-[#130f0d] text-white">
-      <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-coral/20 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-verde/15 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute left-1/3 top-1/3 h-72 w-72 rounded-full bg-mango/10 blur-3xl" />
+    <div className="relative flex min-h-dvh w-full flex-col overflow-x-clip bg-cover bg-center text-white" style={{ backgroundImage: `url('/Gemini_Generated_Image_8ay9zm8ay9zm8ay9.jpeg')` }}>
+        <div className="absolute inset-0 bg-[#130f0d]/60" />
+        <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-coral/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-verde/15 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute left-1/3 top-1/3 h-72 w-72 rounded-full bg-mango/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute top-1/4 right-1/4 h-96 w-96 rounded-full bg-coral/10 blur-3xl animate-glow-strong" />
+        <div aria-hidden className="pointer-events-none absolute bottom-1/4 left-1/6 h-80 w-80 rounded-full bg-verde/10 blur-3xl animate-glow" />
+        <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-mango/5 blur-3xl animate-glow-strong" />
+        <div aria-hidden className="pointer-events-none absolute top-20 left-1/2 -translate-x-1/2 h-40 w-40 rounded-full bg-rosa/15 blur-3xl animate-glow" />
 
       <header className="relative mx-auto w-full max-w-5xl px-4 pt-8 sm:pt-10">
         <p className="font-display text-2xl font-extrabold tracking-tight">
@@ -87,22 +92,22 @@ export function UserSelector() {
       </header>
 
       <main className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-10">
-        <motion.h1
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 240 }}
-          className="text-center font-display text-3xl font-extrabold text-white sm:text-4xl"
-        >
-          ¿Quién está viendo?
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="mt-2 text-center font-display text-base font-semibold text-white/55"
-        >
-          Elegí tu card y empecemos a armar el viaje 💃
-        </motion.p>
+<motion.h1
+           initial={{ opacity: 0, scale: 0.92 }}
+           animate={{ opacity: 1, scale: 1 }}
+           transition={{ type: 'spring', damping: 20, stiffness: 240 }}
+           className="text-center font-display text-3xl font-extrabold text-white sm:text-4xl drop-shadow-[0_0_20px_rgba(255,90,95,0.5)] drop-shadow-[0_0_40px_rgba(255,90,95,0.2)]"
+         >
+           ¿Quién está viendo?
+         </motion.h1>
+         <motion.p
+           initial={{ opacity: 0 }}
+           animate={{ opacity: 1 }}
+           transition={{ delay: 0.1 }}
+           className="mt-2 text-center font-display text-base font-semibold text-white/55 drop-shadow-[0_0_10px_rgba(255,201,60,0.3)]"
+         >
+           Elegí tu card y empecemos a armar el viaje 💃
+         </motion.p>
 
         {loading ? (
           <div className="mt-10 grid w-full max-w-3xl grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6">

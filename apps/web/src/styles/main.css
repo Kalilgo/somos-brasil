@@ -32,6 +32,9 @@
   --animate-rise: rise 0.28s ease-out both;
   --animate-wiggle: wiggle 0.5s ease-in-out both;
   --animate-float-slow: float 4s ease-in-out infinite;
+  --animate-glow: glow 3s ease-in-out infinite;
+  --animate-glow-strong: glow-strong 4s ease-in-out infinite;
+  --animate-pulse-ring: pulse-ring 3s ease-in-out infinite;
 
   @keyframes pop {
     0% { opacity: 0; transform: scale(0.6); }
@@ -48,6 +51,18 @@
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-6px); }
+  }
+  @keyframes glow {
+    0%, 100% { opacity: 0.15; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(1.08); }
+  }
+  @keyframes glow-strong {
+    0%, 100% { opacity: 0.1; transform: scale(1); }
+    50% { opacity: 0.25; transform: scale(1.15); }
+  }
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 0.2; }
+    50% { transform: scale(1.1); opacity: 0.4; }
   }
 }
 
