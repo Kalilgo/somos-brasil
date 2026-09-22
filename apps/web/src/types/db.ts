@@ -30,6 +30,8 @@ export interface TripMember {
   trip_id: string
   user_id: string
   joined_at: string
+  arrival_date: string | null
+  departure_date: string | null
 }
 
 export interface Category {

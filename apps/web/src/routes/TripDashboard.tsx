@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Avatar } from '@/components/ui/Avatar'
 import { LoadingState } from '@/components/feedback/LoadingState'
+import { MemberDates } from '@/components/trip/MemberDates'
 import { useIdeasStore } from '@/lib/state/ideas'
 import { useItineraryStore } from '@/lib/state/itinerary'
 import { useTripParams } from '@/hooks/useTripParams'
@@ -75,6 +76,8 @@ export function TripDashboard() {
           </motion.div>
         ))}
       </div>
+
+      <div className="mt-4">{tripId && <MemberDates tripId={tripId} />}</div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card className="p-5">

@@ -49,6 +49,14 @@ export interface LeaderboardResult {
   newly_earned: (UserBadge & { badge?: Badge | null })[]
 }
 
+export interface MemberTravelDates {
+  user_id: string
+  arrival_date: string | null
+  departure_date: string | null
+}
+
+export type SetMemberDatesInput = Pick<MemberTravelDates, 'arrival_date' | 'departure_date'>
+
 export interface DataRepo {
   readonly kind: 'demo' | 'supabase'
 
@@ -60,6 +68,8 @@ export interface DataRepo {
   createTrip: (input: CreateTripInput) => Promise<Trip>
   updateTrip: (tripId: string, patch: Partial<Pick<Trip, 'name' | 'description' | 'start_date' | 'end_date' | 'currency'>>) => Promise<Trip>
   getTripMembers: (tripId: string) => Promise<AppUser[]>
+  listMemberDates: (tripId: string) => Promise<MemberTravelDates[]>
+  setMemberDates: (tripId: string, userId: string, input: SetMemberDatesInput) => Promise<MemberTravelDates>
 
   listIdeas: (tripId: string) => Promise<IdeaWithRelations[]>
   createIdea: (input: CreateIdeaInput) => Promise<Idea>

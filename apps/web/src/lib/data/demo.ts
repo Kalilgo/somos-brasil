@@ -8,6 +8,7 @@ import type {
   ItineraryItem,
   Reaction,
   Trip,
+  TripMember,
   UserBadge,
   Vote,
 } from '@/types/db'
@@ -18,6 +19,8 @@ import type {
   ItineraryRow,
   ItineraryView,
   LeaderboardResult,
+  MemberTravelDates,
+  SetMemberDatesInput,
 } from './types'
 import {
   computeLeaderboard,
@@ -62,7 +65,7 @@ export const DEMO_BADGES: Badge[] = [
 interface DemoDb {
   version: number
   trips: Trip[]
-  members: { trip_id: string; user_id: string; joined_at: string }[]
+  members: TripMember[]
   ideas: Idea[]
   votes: Vote[]
   comments: IdeaComment[]
@@ -156,9 +159,25 @@ function seedDb(): DemoDb {
   ]
 
   return {
-    version: 1,
+    version: 2,
     trips: [trip],
-    members: DEMO_USERS.map((u) => ({ trip_id: trip.id, user_id: u.id, joined_at: iso(96) })),
+    members: DEMO_USERS.map((u) => {
+      const dates: Record<string, { arrival_date: string; departure_date: string }> = {
+        u_queme: { arrival_date: '2026-02-11', departure_date: '2026-02-23' },
+        u_flor: { arrival_date: '2026-02-10', departure_date: '2026-02-17' },
+        u_dozo: { arrival_date: '2026-02-13', departure_date: '2026-02-24' },
+        u_hongo: { arrival_date: '2026-02-16', departure_date: '2026-02-24' },
+        u_kalil: { arrival_date: '2026-02-10', departure_date: '2026-02-14' },
+      }
+      const d = dates[u.id]
+      return {
+        trip_id: trip.id,
+        user_id: u.id,
+        joined_at: iso(96),
+        arrival_date: d?.arrival_date ?? null,
+        departure_date: d?.departure_date ?? null,
+      }
+    }),
     ideas,
     votes,
     comments,
@@ -174,7 +193,7 @@ function loadOrSeed(): DemoDb {
     const raw = localStorage.getItem(LS_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as DemoDb
-      if (parsed.version === 1 && parsed.trips?.length) return parsed
+      if (parsed.version === 2 && parsed.trips?.length) return parsed
     }
   } catch {
     // seed fresh
@@ -241,7 +260,7 @@ class DemoRepo implements DataRepo {
     }
     this.db.trips.push(trip)
     for (const userId of input.memberIds) {
-      this.db.members.push({ trip_id: trip.id, user_id: userId, joined_at: now() })
+      this.db.members.push({ trip_id: trip.id, user_id: userId, joined_at: now(), arrival_date: null, departure_date: null })
     }
     this.save()
     return trip
@@ -258,6 +277,21 @@ class DemoRepo implements DataRepo {
   async getTripMembers(tripId: string) {
     const ids = this.db.members.filter((m) => m.trip_id === tripId).map((m) => m.user_id)
     return DEMO_USERS.filter((u) => ids.includes(u.id)).sort((a, b) => a.sort_order - b.sort_order)
+  }
+
+  async listMemberDates(tripId: string): Promise<MemberTravelDates[]> {
+    return this.db.members
+      .filter((m) => m.trip_id === tripId)
+      .map((m) => ({ user_id: m.user_id, arrival_date: m.arrival_date, departure_date: m.departure_date }))
+  }
+
+  async setMemberDates(tripId: string, userId: string, input: SetMemberDatesInput): Promise<MemberTravelDates> {
+    const member = this.db.members.find((m) => m.trip_id === tripId && m.user_id === userId)
+    if (!member) throw new Error('No sos parte de este viaje')
+    member.arrival_date = input.arrival_date ?? null
+    member.departure_date = input.departure_date ?? null
+    this.save()
+    return { user_id: member.user_id, arrival_date: member.arrival_date, departure_date: member.departure_date }
   }
 
   private buildRelations(tripId: string) {

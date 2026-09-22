@@ -17,6 +17,8 @@ import type {
   ItineraryRow,
   ItineraryView,
   LeaderboardResult,
+  MemberTravelDates,
+  SetMemberDatesInput,
 } from './types'
 import { ensureIdeaRelations } from './logic'
 import { supabase } from '@/lib/supabase/client'
@@ -103,6 +105,27 @@ class SupabaseRepo implements DataRepo {
       .filter((u): u is AppUser => Boolean(u))
       .sort((a, b) => a.sort_order - b.sort_order)
     return users
+  }
+
+  async listMemberDates(tripId: string): Promise<MemberTravelDates[]> {
+    const { data, error } = await supabase()
+      .from('trip_members')
+      .select('user_id, arrival_date, departure_date')
+      .eq('trip_id', tripId)
+    if (error) throw error
+    return data as MemberTravelDates[]
+  }
+
+  async setMemberDates(tripId: string, userId: string, input: SetMemberDatesInput): Promise<MemberTravelDates> {
+    const { data, error } = await supabase()
+      .from('trip_members')
+      .update({ arrival_date: input.arrival_date ?? null, departure_date: input.departure_date ?? null })
+      .eq('trip_id', tripId)
+      .eq('user_id', userId)
+      .select('user_id, arrival_date, departure_date')
+      .single()
+    if (error) throw error
+    return data as MemberTravelDates
   }
 
   async listIdeas(tripId: string) {
