@@ -29,8 +29,10 @@ export function IdeasFeed() {
     if (filters.status !== 'all' && filters.status !== 'discarded') list = list.filter((i) => i.status === filters.status)
     if (filters.status === 'discarded') list = ideas.filter((i) => i.status === 'discarded')
 
-    const votes = (i: (typeof list)[number]) =>
-      (i.vote_counts['🔥'] ?? 0) + (i.vote_counts['❤️'] ?? 0) + (i.vote_counts['😐'] ?? 0) + (i.vote_counts['🙅'] ?? 0)
+    const votes = (i: (typeof list)[number]) => {
+      const v = i.vote_counts ?? {}
+      return (v['🔥'] ?? 0) + (v['❤️'] ?? 0) + (v['😐'] ?? 0) + (v['🙅'] ?? 0)
+    }
 
     switch (filters.sort) {
       case 'votes':

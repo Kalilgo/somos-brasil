@@ -31,7 +31,7 @@ export function TripDashboard() {
   if (loadingIdeas) return <LoadingState />
 
   const totalVotes = ideas.reduce(
-    (acc, i) => acc + Object.values(i.vote_counts).reduce((a, b) => a + b, 0),
+    (acc, i) => acc + Object.values(i.vote_counts ?? {}).reduce((a, b) => a + b, 0),
     0,
   )
   const confirmed = ideas.filter((i) => i.status === 'confirmed').length
