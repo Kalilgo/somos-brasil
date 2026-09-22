@@ -5,7 +5,6 @@ import { useAuthStore } from '@/lib/state/auth'
 
 export function UserMenu() {
   const currentUser = useAuthStore((s) => s.currentUser)
-  const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
 
   if (!currentUser) return null
@@ -37,7 +36,6 @@ export function UserMenu() {
           <MenuItem
             onClick={() => {
               close()
-              logout()
               navigate('/')
             }}
             className="!text-coral"
