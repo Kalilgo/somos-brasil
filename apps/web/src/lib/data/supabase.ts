@@ -170,6 +170,9 @@ class SupabaseRepo implements DataRepo {
   }
 
   async createIdea(input: CreateIdeaInput) {
+    if (!input.category_id) {
+      throw new Error('Falta elegir una categoría para la idea.')
+    }
     const { data, error } = await supabase()
       .from('ideas')
       .insert({

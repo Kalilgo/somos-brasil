@@ -19,6 +19,7 @@ interface IdeaFormProps {
 }
 
 export interface FieldErrors {
+  category?: string
   title?: string
   price?: string
   url?: string
@@ -74,13 +75,16 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
     if (title.trim().length < 3) {
       next.title = 'El título necesita al menos 3 caracteres. ¡Poné onda!'
     }
+    if (!categoryId) {
+      next.category = 'Elegí una categoría para la idea.'
+    }
     if (!priceOk) {
       next.price = 'El precio tiene que ser un número ≥ 0, o dejalo vacío si recién lo averiguás.'
     }
     if (!urlOk) {
       next.url = 'Esos links no son URLs válidas (empezá con http:// o https://).'
     }
-    if (next.title || next.price || next.url) {
+    if (next.title || next.category || next.price || next.url) {
       setErrors(next)
       return
     }
@@ -150,6 +154,14 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
               </button>
             ))}
           </div>
+          {errors.category &&
+            (categories.length === 0 ? (
+              <p className="mt-2 text-xs font-semibold text-danger">
+                {errors.category} (¿las categorías siguen cargando? Reintentá en un segundo)
+              </p>
+            ) : (
+              <p className="mt-2 text-xs font-semibold text-danger">{errors.category}</p>
+            ))}
         </fieldset>
 
         <Input
