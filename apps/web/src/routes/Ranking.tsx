@@ -68,7 +68,7 @@ export function Ranking() {
         </motion.span>
         <h2 className="mt-2 font-display text-3xl font-extrabold text-ink">Ranking del grupo</h2>
         <p className="mt-1 font-medium text-ink-soft">
-          Ideas ×3 + votos ×1 + comentarios ×2. El más activo se lleva el manaos 👑
+          Ideas ×3 + votos ×1 + recibidos ×1 + comentarios ×2. El más activo se lleva el manaos 👑
         </p>
       </div>
 

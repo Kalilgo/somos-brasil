@@ -1,24 +1,27 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import type { IdeaStatus, IdeaWithRelations, Reaction } from '@/types/db'
+import type { AppUser, IdeaStatus, IdeaWithRelations, Reaction } from '@/types/db'
 import { Card } from '@/components/ui/Card'
 import { Avatar } from '@/components/ui/Avatar'
 import { ReactionPicker } from './ReactionPicker'
+import type { Reactor } from './ReactionPicker'
 import { StatusMenu } from './StatusMenu'
 import { CommentsSection } from './CommentsSection'
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog'
 import { AddToItineraryModal } from '@/components/itinerary/AddToItineraryModal'
 import { fireMiniConfetti } from '@/components/feedback/Confetti'
 import { useIdeasStore } from '@/lib/state/ideas'
+import { useAuthStore } from '@/lib/state/auth'
 import { toastError, toastSuccess } from '@/lib/state/toasts'
 import { priceLabel, timeAgo } from '@/lib/utils/format'
-import { IDEA_STATUSES } from '@/lib/utils/constants'
+import { IDEA_STATUSES, REACTIONS } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
 
-export function IdeaCard({ idea }: { idea: IdeaWithRelations }) {
+export function IdeaCard({ idea, members }: { idea: IdeaWithRelations; members?: AppUser[] }) {
   const toggleVote = useIdeasStore((s) => s.toggleVote)
   const changeStatus = useIdeasStore((s) => s.changeStatus)
   const removeIdea = useIdeasStore((s) => s.removeIdea)
+  const myUserId = useAuthStore((s) => s.currentUser?.id)
 
   const [commentsOpen, setCommentsOpen] = useState(false)
   const [confirmStatus, setConfirmStatus] = useState<IdeaStatus | null>(null)
@@ -28,6 +31,24 @@ export function IdeaCard({ idea }: { idea: IdeaWithRelations }) {
 
   const category = idea.category
   const statusInfo = IDEA_STATUSES[idea.status]
+
+  const membersById = new Map((members ?? []).map((u) => [u.id, u]))
+  const reactors = (Object.fromEntries(
+    REACTIONS.map(({ reaction }) => [
+      reaction,
+      (idea.votes ?? [])
+        .filter((v) => v.reaction === reaction)
+        .map((v): Reactor => {
+          const u = membersById.get(v.user_id)
+          return {
+            user_id: v.user_id,
+            name: u?.name ?? '???',
+            emoji: u?.emoji ?? '👤',
+            color: u?.color ?? '#94a3b8',
+          }
+        }),
+    ]),
+  ) as Partial<Record<Reaction, Reactor[]>>)
 
   const handleVote = (reaction: Reaction) => {
     if (reaction === '🙅' && idea.my_vote !== '🙅') {
@@ -127,6 +148,8 @@ export function IdeaCard({ idea }: { idea: IdeaWithRelations }) {
               counts={idea.vote_counts}
               myVote={idea.my_vote}
               onVote={handleVote}
+              myUserId={myUserId}
+              reactors={reactors}
             />
             <div className="flex items-center gap-1.5">
               {idea.status === 'confirmed' && !idea.in_itinerary && (

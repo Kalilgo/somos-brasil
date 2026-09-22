@@ -17,6 +17,7 @@ export function IdeasFeed() {
   const filters = useIdeasStore((s) => s.filters)
   const loadIdeas = useIdeasStore((s) => s.loadIdeas)
   const categories = useTripsStore((s) => s.categories)
+  const members = useTripsStore((s) => (tripId ? s.membersByTrip[tripId] : undefined))
   const [formOpen, setFormOpen] = useState(false)
 
   useEffect(() => {
@@ -86,7 +87,7 @@ export function IdeasFeed() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {filtered.map((idea) => (
-            <IdeaCard key={idea.id} idea={idea} />
+            <IdeaCard key={idea.id} idea={idea} members={members} />
           ))}
         </div>
       )}

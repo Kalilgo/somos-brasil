@@ -96,7 +96,7 @@ export default {
 
     const ranking: LeaderRow[] = (rows as Row[]).map((r) => {
       const u = userById.get(r.user_id)
-      const score = r.ideas * 3 + r.votes * 1 + r.comments * 2
+      const score = r.ideas * 3 + r.votes * 1 + r.comments * 2 + r.reactions_received * 1
       return {
         user_id: r.user_id,
         name: u?.name ?? '???',

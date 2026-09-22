@@ -28,6 +28,7 @@ export const IDEA_STATUS_FLOW: IdeaStatus[] = ['proposal', 'discussing', 'confir
 export const SCORE_WEIGHTS = {
   ideas: 3,
   votes: 1,
+  received: 1,
   comments: 2,
 } as const
 

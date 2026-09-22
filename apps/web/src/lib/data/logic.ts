@@ -97,6 +97,7 @@ interface BadgeRule {
 interface PerUserStats {
   ideasProposed: number
   votesCast: number
+  reactionsReceived: number
   commentsMade: number
   ideasConfirmed: number
   categoriesTouched: number
@@ -124,16 +125,22 @@ function userStats(
   const activityDays = new Set<string>()
   const addDay = (iso: string) => activityDays.add(new Date(iso).toISOString().slice(0, 10))
   mine.forEach((i) => addDay(i.created_at))
-  votes
-    .filter((v) => v.user_id === user.id)
-    .forEach((v) => addDay(v.created_at))
+  const myVotes = votes.filter((v) => v.user_id === user.id)
+  myVotes.forEach((v) => addDay(v.created_at))
   comments
     .filter((c) => c.user_id === user.id)
     .forEach((c) => addDay(c.created_at))
 
+  const ideaOwner = new Map(ideas.map((i) => [i.id, i.user_id]))
+  const votesToOthers = myVotes.filter((v) => ideaOwner.get(v.idea_id) !== user.id).length
+  const reactionsReceived = votes.filter(
+    (v) => ideaOwner.get(v.idea_id) === user.id && v.user_id !== user.id,
+  ).length
+
   return {
     ideasProposed: mine.length,
-    votesCast: votes.filter((v) => v.user_id === user.id).length,
+    votesCast: votesToOthers,
+    reactionsReceived,
     commentsMade: comments.filter((c) => c.user_id === user.id).length,
     ideasConfirmed: mine.filter((i) => i.status === 'confirmed').length,
     categoriesTouched: new Set(mine.map((i) => i.category_id).filter((id) => categoriesByIdea.get(id)?.id)).size,
@@ -192,6 +199,7 @@ export function computeLeaderboard(
       score:
         s.ideasProposed * SCORE_WEIGHTS.ideas +
         s.votesCast * SCORE_WEIGHTS.votes +
+        s.reactionsReceived * SCORE_WEIGHTS.received +
         s.commentsMade * SCORE_WEIGHTS.comments,
       ideas: s.ideasProposed,
       votes: s.votesCast,
