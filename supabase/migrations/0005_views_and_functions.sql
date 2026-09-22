@@ -59,18 +59,24 @@ select jsonb_build_object(
     'totals_per_category', coalesce(
       (
         select jsonb_agg(jsonb_build_object(
-          'category_id', c.id,
-          'slug', c.slug,
-          'name', c.name,
-          'emoji', c.emoji,
-          'color', c.color,
-          'total', sum(i.price),
-          'count', count(i.id)
-        ) order by c.sort_order)
-        from public.categories c
-        join public.ideas i on i.category_id = c.id
-        where i.trip_id = p_trip_id and i.status = 'confirmed'
-        group by c.id, c.slug, c.name, c.emoji, c.color, c.sort_order
+          'category_id', t.category_id,
+          'slug', t.slug,
+          'name', t.name,
+          'emoji', t.emoji,
+          'color', t.color,
+          'total', t.total,
+          'count', t.count
+        ) order by t.sort_order)
+        from (
+          select
+            c.id as category_id, c.slug, c.name, c.emoji, c.color, c.sort_order,
+            sum(i.price) as total,
+            count(i.id) as count
+          from public.categories c
+          join public.ideas i on i.category_id = c.id
+          where i.trip_id = p_trip_id and i.status = 'confirmed'
+          group by c.id, c.slug, c.name, c.emoji, c.color, c.sort_order
+        ) t
       ),
       '[]'::jsonb
     ),
