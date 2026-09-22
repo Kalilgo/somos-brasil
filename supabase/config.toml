@@ -35,7 +35,7 @@ port = 54324
 users = []
 
 [storage]
-enabled = true
+enabled = false
 file_size_limit = "50MiB"
 
 [auth]
@@ -45,10 +45,10 @@ additional_redirect_urls = ["https://localhost:5173"]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
-enable_signup = true
+enable_signup = false
 
 [auth.email]
-enable_signup = true
+enable_signup = false
 double_confirm_changes = true
 enable_confirmations = false
 
@@ -62,4 +62,12 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.add-to-itinerary]
+verify_jwt = false
+
+# Sesión con PIN del grupo: valida {user_id, pin} y emite un JWT custom HS256.
+[functions.login]
+verify_jwt = false
+
+# Toda escritura pasa por acá (service role + validación + rate limit + identidad del JWT).
+[functions.member-actions]
 verify_jwt = false

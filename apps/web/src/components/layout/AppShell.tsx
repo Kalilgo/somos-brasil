@@ -4,6 +4,9 @@ import { AppHeader } from './AppHeader'
 import { Toaster } from '@/components/feedback/Toaster'
 import { useAuthStore } from '@/lib/state/auth'
 import { useTripsStore } from '@/lib/state/trips'
+import { isDemoMode } from '@/lib/data'
+import { activeToken } from '@/lib/data/session'
+import { setSessionToken } from '@/lib/supabase/client'
 
 export function AppShell() {
   const currentUser = useAuthStore((s) => s.currentUser)
@@ -15,6 +18,12 @@ export function AppShell() {
   }, [loadCategories])
 
   if (!currentUser) {
+    return <Navigate to="/" replace />
+  }
+
+  // En modo real, aunque haya usuario elegido, sin sesión válida volvé a elegir con PIN.
+  if (!isDemoMode && !activeToken()) {
+    setSessionToken(null)
     return <Navigate to="/" replace />
   }
 

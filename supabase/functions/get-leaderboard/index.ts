@@ -1,6 +1,7 @@
 // Edge Runtime type definitions
 import '@supabase/functions-js/edge-runtime.d.ts'
 import { withSupabase } from '@supabase/server'
+import { ipOf, rateAllowed } from '../_shared/rate.ts'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -61,6 +62,14 @@ function activityStreak(days: string[]): number {
 
 export default {
   fetch: withSupabase({ auth: 'none' }, async (req, ctx) => {
+    const ip = ipOf(req)
+    if (!(await rateAllowed(ctx.supabaseAdmin, `lb:ip:${ip}`, 30, 60))) {
+      return Response.json({ message: 'Vas muy rápido, esperá un toque.' }, { status: 429 })
+    }
+    if (!(await rateAllowed(ctx.supabaseAdmin, `lb:ip:${ip}`, 300, 3600))) {
+      return Response.json({ message: 'Llegaste al límite de consultas de esta hora.' }, { status: 429 })
+    }
+
     const body = await req.json().catch(() => ({})) as { trip_id?: unknown }
     const { trip_id } = body
 

@@ -23,6 +23,31 @@ import type {
 import { ensureIdeaRelations } from './logic'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/lib/state/auth'
+import { activeToken, logoutSession } from './session'
+
+type MemberResult = Record<string, unknown>
+
+// Toda escritura pasa por la edge function member-actions: identidad del JWT,
+// validación de negocio y rate limiting viven en el servidor.
+async function callMember(action: string, payload: Record<string, unknown>): Promise<MemberResult> {
+  const token = activeToken()
+  if (!token) throw new Error('Necesitás entrar con tu PIN para eso.')
+  const { data, error } = await supabase().functions.invoke('member-actions', {
+    body: { action, ...payload },
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (error) {
+    const status = error.context?.status as number | undefined
+    const msg = (data as { message?: string } | null)?.message ?? error.message ?? 'No se pudo completar'
+    if (status === 429) throw new Error('Vas muy rápido, esperá un toque y volvé a intentar.')
+    if (status === 401) {
+      logoutSession()
+      throw new Error('La sesión venció. Volvé a entrar con tu PIN.')
+    }
+    throw new Error(msg)
+  }
+  return (data ?? {}) as MemberResult
+}
 
 class SupabaseRepo implements DataRepo {
   readonly kind = 'supabase' as const
@@ -67,35 +92,25 @@ class SupabaseRepo implements DataRepo {
     if (!userId || new Set(input.memberIds).size !== input.memberIds.length) {
       throw new Error('Faltan integrantes del viaje o hay repetidos.')
     }
-    const { data: trip, error } = await supabase()
-      .from('trips')
-      .insert({
-        name,
-        description: input.description?.trim() || null,
-        currency: input.currency,
-        start_date: input.start_date || null,
-        end_date: input.end_date || null,
-        created_by: userId,
-        status: 'planning',
-      })
-      .select()
-      .single()
-    if (error) throw error
-    const rows = input.memberIds.map((memberId) => ({ trip_id: trip.id as string, user_id: memberId }))
-    const { error: membersError } = await supabase().from('trip_members').insert(rows)
-    if (membersError) throw membersError
-    return trip as Trip
+    const result = await callMember('create_trip', {
+      name,
+      description: input.description?.trim() || null,
+      currency: input.currency,
+      start_date: input.start_date || null,
+      end_date: input.end_date || null,
+      member_ids: input.memberIds,
+    })
+    return result.trip as Trip
   }
 
   async updateTrip(tripId: string, patch: Partial<Pick<Trip, 'name' | 'description' | 'start_date' | 'end_date' | 'currency'>>) {
-    const { data, error } = await supabase()
-      .from('trips')
-      .update(patch)
-      .eq('id', tripId)
-      .select()
-      .single()
-    if (error) throw error
-    return data as Trip
+    const cleanPatch: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(patch)) {
+      if (k === 'name') cleanPatch.name = typeof v === 'string' ? v.trim() : v
+      else cleanPatch[k] = v
+    }
+    const result = await callMember('update_trip', { trip_id: tripId, patch: cleanPatch })
+    return result.trip as Trip
   }
 
   async getTripMembers(tripId: string) {
@@ -122,19 +137,14 @@ class SupabaseRepo implements DataRepo {
   }
 
   async setMemberPlan(tripId: string, userId: string, input: SetMemberPlanInput): Promise<MemberPlan> {
-    const { data, error } = await supabase()
-      .from('trip_members')
-      .update({
-        arrival_date: input.arrival_date ?? null,
-        departure_date: input.departure_date ?? null,
-        location: input.location?.trim() ? input.location.trim() : null,
-      })
-      .eq('trip_id', tripId)
-      .eq('user_id', userId)
-      .select('user_id, arrival_date, departure_date, location')
-      .single()
-    if (error) throw error
-    return data as MemberPlan
+    const result = await callMember('set_member_plan', {
+      trip_id: tripId,
+      user_id: userId,
+      arrival_date: input.arrival_date ?? null,
+      departure_date: input.departure_date ?? null,
+      location: input.location?.trim() ? input.location.trim() : null,
+    })
+    return result.plan as unknown as MemberPlan
   }
 
   async listIdeas(tripId: string) {
@@ -185,56 +195,36 @@ class SupabaseRepo implements DataRepo {
     if (input.price != null && (!Number.isFinite(input.price) || input.price < 0)) {
       throw new Error('El precio tiene que ser un número ≥ 0.')
     }
-    const { data, error } = await supabase()
-      .from('ideas')
-      .insert({
-        trip_id: input.trip_id,
-        category_id: input.category_id,
-        user_id: input.user_id,
-        title,
-        description: input.description?.trim() || null,
-        link: input.link?.trim() || null,
-        image_url: input.image_url?.trim() || null,
-        price: input.price,
-        currency: input.currency,
-        status: 'proposal',
-      })
-      .select()
-      .single()
-    if (error) throw error
-    return data as Idea
+    const result = await callMember('create_idea', {
+      trip_id: input.trip_id,
+      category_id: input.category_id,
+      title,
+      description: input.description?.trim() || null,
+      link: input.link?.trim() || null,
+      image_url: input.image_url?.trim() || null,
+      price: input.price,
+      currency: input.currency,
+    })
+    return result.idea as Idea
   }
 
   async updateIdeaStatus(ideaId: string, status: IdeaStatus) {
-    const { data, error } = await supabase()
-      .from('ideas')
-      .update({ status })
-      .eq('id', ideaId)
-      .select()
-      .single()
-    if (error) throw error
-    return data as Idea
+    const result = await callMember('update_idea_status', { idea_id: ideaId, status })
+    return result.idea as Idea
   }
 
   async deleteIdea(ideaId: string) {
-    const { error } = await supabase().from('ideas').delete().eq('id', ideaId)
-    if (error) throw error
+    await callMember('delete_idea', { idea_id: ideaId })
   }
 
   async upsertVote(ideaId: string, userId: string, reaction: Reaction) {
-    const { error } = await supabase()
-      .from('votes')
-      .upsert({ idea_id: ideaId, user_id: userId, reaction }, { onConflict: 'idea_id,user_id' })
-    if (error) throw error
+    void userId
+    await callMember('vote', { idea_id: ideaId, reaction })
   }
 
   async removeVote(ideaId: string, userId: string) {
-    const { error } = await supabase()
-      .from('votes')
-      .delete()
-      .eq('idea_id', ideaId)
-      .eq('user_id', userId)
-    if (error) throw error
+    void userId
+    await callMember('remove_vote', { idea_id: ideaId })
   }
 
   async listComments(ideaId: string) {
@@ -250,13 +240,9 @@ class SupabaseRepo implements DataRepo {
   async addComment(ideaId: string, userId: string, body: string) {
     const clean = body.trim()
     if (!clean) throw new Error('El comentario no puede estar vacío.')
-    const { data, error } = await supabase()
-      .from('comments')
-      .insert({ idea_id: ideaId, user_id: userId, body: clean })
-      .select()
-      .single()
-    if (error) throw error
-    return data as IdeaComment
+    void userId
+    const result = await callMember('add_comment', { idea_id: ideaId, body: clean })
+    return result.comment as IdeaComment
   }
 
   async listItinerary(tripId: string): Promise<ItineraryView> {
@@ -278,27 +264,20 @@ class SupabaseRepo implements DataRepo {
   }
 
   async addToItinerary(tripId: string, ideaId: string, dayNumber: number) {
-    const { data, error } = await supabase().functions.invoke('add-to-itinerary', {
-      body: { trip_id: tripId, idea_id: ideaId, day_number: dayNumber },
+    const result = await callMember('add_to_itinerary', {
+      trip_id: tripId,
+      idea_id: ideaId,
+      day_number: dayNumber,
     })
-    if (error || !data?.ok) {
-      const msg = (data as { message?: string } | null)?.message ?? error?.message ?? 'No se pudo agregar'
-      throw new Error(msg)
-    }
-    return (data as { item: ItineraryRow }).item
+    return (result as { item: ItineraryRow }).item
   }
 
   async removeFromItinerary(itemId: string) {
-    const { error } = await supabase().from('itinerary_items').delete().eq('id', itemId)
-    if (error) throw error
+    await callMember('remove_from_itinerary', { item_id: itemId })
   }
 
   async moveItineraryItem(itemId: string, dayNumber: number, sortOrder: number) {
-    const { error } = await supabase()
-      .from('itinerary_items')
-      .update({ day_number: dayNumber, sort_order: sortOrder })
-      .eq('id', itemId)
-    if (error) throw error
+    await callMember('move_itinerary_item', { item_id: itemId, day_number: dayNumber, sort_order: sortOrder })
   }
 
   async getTripSummary(tripId: string) {

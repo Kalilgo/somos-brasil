@@ -1,12 +1,21 @@
 // Edge Runtime type definitions
 import '@supabase/functions-js/edge-runtime.d.ts'
 import { withSupabase } from '@supabase/server'
+import { ipOf, rateAllowed } from '../_shared/rate.ts'
 
 // auth 'none': la app no usa auth.users (decisión D1). Los endpoints validan input y
 // devuelven JSON de error; el endurecimiento con clave publishable se documenta en
 // docs/decisions.md. verify_jwt = false en config.toml.
 export default {
   fetch: withSupabase({ auth: 'none' }, async (req, ctx) => {
+    const ip = ipOf(req)
+    if (!(await rateAllowed(ctx.supabaseAdmin, `summary:ip:${ip}`, 30, 60))) {
+      return Response.json({ message: 'Vas muy rápido, esperá un toque.' }, { status: 429 })
+    }
+    if (!(await rateAllowed(ctx.supabaseAdmin, `summary:ip:${ip}`, 300, 3600))) {
+      return Response.json({ message: 'Llegaste al límite de consultas de esta hora.' }, { status: 429 })
+    }
+
     const body = await req.json().catch(() => ({})) as { trip_id?: unknown }
     const { trip_id } = body
 

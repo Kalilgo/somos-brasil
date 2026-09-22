@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { motion, type Variants } from 'motion/react'
 import type { AppUser } from '@/types/db'
-import { repo } from '@/lib/data'
+import { repo, isDemoMode } from '@/lib/data'
 import { useAuthStore } from '@/lib/state/auth'
-import { toastSuccess } from '@/lib/state/toasts'
+import { toastError, toastSuccess } from '@/lib/state/toasts'
 import { fireCelebration } from '@/components/feedback/Confetti'
+import { Modal } from '@/components/ui/Modal'
+import { Button } from '@/components/ui/Button'
+import { activateUserToken, loginWithPin } from '@/lib/data/session'
 import { cn } from '@/lib/utils/cn'
 
 const container: Variants = {
@@ -24,6 +27,9 @@ export function UserSelector() {
   const navigate = useNavigate()
   const [users, setUsers] = useState<AppUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [pinUser, setPinUser] = useState<AppUser | null>(null)
+  const [pin, setPin] = useState('')
+  const [pinBusy, setPinBusy] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -36,11 +42,36 @@ export function UserSelector() {
     }
   }, [])
 
-  const pick = (user: AppUser) => {
+  const finish = (user: AppUser) => {
     setCurrentUser(user)
     fireCelebration()
     toastSuccess(`¡Bienvenido/a ${user.name}!`, user.emoji)
     navigate('/viajes')
+  }
+
+  const pick = (user: AppUser) => {
+    if (isDemoMode || activateUserToken(user.id)) {
+      finish(user)
+      return
+    }
+    setPinUser(user)
+    setPin('')
+  }
+
+  const submitPin = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!pinUser || pinBusy) return
+    setPinBusy(true)
+    try {
+      await loginWithPin(pinUser, pin)
+      setPinUser(null)
+      finish(pinUser)
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'PIN incorrecto')
+      setPin('')
+    } finally {
+      setPinBusy(false)
+    }
   }
 
   return (
@@ -128,10 +159,40 @@ export function UserSelector() {
         )}
 
         <p className="mt-10 max-w-sm text-center text-sm font-medium leading-relaxed text-white/45">
-          Cualquiera puede sumarse al toque: elegí tu card y arrancamos. Tu elección queda guardada
-          en este dispositivo.
+          {isDemoMode
+            ? 'Cualquiera puede sumarse al toque: elegí tu card y arrancamos. Tu elección queda guardada en este dispositivo.'
+            : 'Elegí tu card. La primera vez en este dispositivo te pide el PIN del grupo para entrar.'}
         </p>
       </main>
+
+      <Modal
+        open={Boolean(pinUser)}
+        onClose={() => setPinUser(null)}
+        title={`Hola ${pinUser?.name ?? ''}`}
+        emoji={pinUser?.emoji}
+        ariaLabel="Ingresar PIN del grupo"
+      >
+        <form onSubmit={submitPin} className="flex flex-col gap-3">
+          <p className="text-sm font-medium text-ink-soft">
+            Escribí el PIN que les pasó el grupo para entrar (
+            <span aria-label="">si no lo tenés, pedíselo por WhatsApp</span>).
+          </p>
+          <input
+            type="password"
+            inputMode="text"
+            autoFocus
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+            placeholder="PIN del grupo"
+            maxLength={64}
+            aria-label="PIN del grupo"
+            className="rounded-xl border-2 border-ink/10 px-4 py-3 font-display text-lg font-bold tracking-[0.3em] text-ink outline-none transition-colors focus:border-coral/60 focus-visible:ring-2 focus-visible:ring-coral/60"
+          />
+          <Button type="submit" disabled={pinBusy || pin.length === 0} className="shadow-pop">
+            {pinBusy ? 'Entrando...' : 'Entrar 🎉'}
+          </Button>
+        </form>
+      </Modal>
     </div>
   )
 }

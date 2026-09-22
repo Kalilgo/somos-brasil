@@ -1,6 +1,8 @@
 // Edge Runtime type definitions
 import '@supabase/functions-js/edge-runtime.d.ts'
 import { withSupabase } from '@supabase/server'
+import { appUserIdFrom } from '../_shared/auth.ts'
+import { ipOf, rateAllowed } from '../_shared/rate.ts'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -8,22 +10,33 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 // en el servidor, de modo que no viva solo en el cliente.
 export default {
   fetch: withSupabase({ auth: 'none' }, async (req, ctx) => {
+    // Deprecada: la escritura de itinerario se movió a member-actions. Se mantiene
+    // endurecida (JWT + rate limit) para que no quede ningún path de escritura abierto.
+    const userId = await appUserIdFrom(req)
+    if (!userId) {
+      return Response.json({ message: 'Sesión inválida o vencida.' }, { status: 401 })
+    }
+    const ip = ipOf(req)
+    if (!(await rateAllowed(ctx.supabaseAdmin, `ait:ip:${ip}`, 20, 60))) {
+      return Response.json({ message: 'Vas muy rápido, esperá un toque.' }, { status: 429 })
+    }
+    if (!(await rateAllowed(ctx.supabaseAdmin, `ait:user:${userId}`, 30, 3600))) {
+      return Response.json({ message: 'Máximo 30 cambios de itinerario por hora.' }, { status: 429 })
+    }
+
     const body = await req.json().catch(() => ({})) as {
       trip_id?: unknown
       idea_id?: unknown
       day_number?: unknown
       user_id?: unknown
     }
-    const { trip_id, idea_id, day_number, user_id } = body
+    const { trip_id, idea_id, day_number } = body
 
     if (typeof trip_id !== 'string' || !UUID_RE.test(trip_id)) {
       return Response.json({ message: 'trip_id inválido' }, { status: 400 })
     }
     if (typeof idea_id !== 'string' || !UUID_RE.test(idea_id)) {
       return Response.json({ message: 'idea_id inválido' }, { status: 400 })
-    }
-    if (typeof user_id !== 'string' || !UUID_RE.test(user_id)) {
-      return Response.json({ message: 'user_id inválido' }, { status: 400 })
     }
     if (!Number.isInteger(day_number) || (day_number as number) < 1) {
       return Response.json({ message: 'day_number debe ser un entero >= 1' }, { status: 400 })
@@ -76,7 +89,7 @@ export default {
 
     const { data: item, error } = await ctx.supabaseAdmin
       .from('itinerary_items')
-      .insert({ trip_id, idea_id, day_number, sort_order, added_by: user_id })
+      .insert({ trip_id, idea_id, day_number, sort_order, added_by: userId })
       .select('*')
       .single()
 
