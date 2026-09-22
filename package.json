@@ -1,0 +1,14 @@
+{
+  "name": "somos-brasil",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @somos-brasil/web",
+    "build": "npm run build -w @somos-brasil/web",
+    "lint": "npm run lint -w @somos-brasil/web",
+    "typecheck": "npm run typecheck -w @somos-brasil/web"
+  }
+}

@@ -1,0 +1,31 @@
+# deps
+node_modules/
+
+# build outputs
+dist/
+dist-ssr/
+*.local
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# editor / os
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# supabase local
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+
+# vercel
+.vercel/
