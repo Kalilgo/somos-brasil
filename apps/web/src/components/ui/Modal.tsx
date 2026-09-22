@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useEffectEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { cn } from '@/lib/utils/cn'
@@ -22,6 +22,7 @@ const sizes = {
 
 export function Modal({ open, onClose, title, emoji, children, footer, size = 'md', ariaLabel }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null)
+  const onCloseEvent = useEffectEvent(onClose)
 
   useEffect(() => {
     if (!open) return
@@ -29,7 +30,7 @@ export function Modal({ open, onClose, title, emoji, children, footer, size = 'm
     document.body.style.overflow = 'hidden'
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose()
+        onCloseEvent()
         return
       }
       if (e.key !== 'Tab') return
@@ -60,7 +61,7 @@ export function Modal({ open, onClose, title, emoji, children, footer, size = 'm
       document.removeEventListener('keydown', onKey)
       prevFocus?.focus()
     }
-  }, [open, onClose])
+  }, [open])
 
   return createPortal(
     <AnimatePresence>
