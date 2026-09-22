@@ -5,7 +5,7 @@ const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 
 export const supabaseConfigured = Boolean(url && anonKey)
 
-let sessionToken: string | null = null
+let cached: SupabaseClient | null = null
 
 export function getSupabaseClient(): SupabaseClient {
   if (!url || !anonKey) {
@@ -15,19 +15,18 @@ export function getSupabaseClient(): SupabaseClient {
   }
   return createClient(url, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: {
-      headers: sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {},
-    },
   })
 }
 
-let cached: SupabaseClient | null = null
 export function supabase(): SupabaseClient {
   if (!cached) cached = getSupabaseClient()
   return cached
 }
 
-export function setSessionToken(token: string | null): void {
-  sessionToken = token
+// El JWT custom de sesión NO va como header global: PostgREST lo rechaza por
+// ser de otro secreto (401 en las lecturas). Las lecturas son públicas vía
+// RLS y las escrituras envían el Bearer explícitamente a member-actions.
+// setSessionToken solo invalida el cliente cacheado al cambiar de sesión.
+export function setSessionToken(_token: string | null): void {
   cached = null
 }
