@@ -1,13 +1,38 @@
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+function appVersion(): Plugin {
+  return {
+    name: 'app-version',
+    apply: 'build',
+    transformIndexHtml(html) {
+      const sha = process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_COMMIT_SHA
+      const version = sha
+        ? sha.slice(0, 8)
+        : new Date().toISOString().replace(/\D/g, '').slice(0, 14)
+      return {
+        html,
+        tags: [
+          {
+            tag: 'meta',
+            attrs: { name: 'app-version', content: version },
+            injectTo: 'head-prepend',
+          },
+        ],
+      }
+    },
+  }
+}
+
 export default defineConfig({
+  base: '/',
   plugins: [
     react(),
     tailwindcss(),
+    appVersion(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',

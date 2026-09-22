@@ -1,14 +1,25 @@
+import { useEffect } from 'react'
 import { MotionConfig } from 'motion/react'
 import { RouterProvider } from 'react-router'
 import { router } from '@/router'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
+import { CHUNK_RETRY_KEY } from '@/lib/chunk'
+import { ChunkErrorBoundary } from '@/components/feedback/ChunkErrorBoundary'
+import { UpdateBanner } from '@/components/feedback/UpdateBanner'
 
 export default function App() {
+  useEffect(() => {
+    sessionStorage.removeItem(CHUNK_RETRY_KEY)
+  }, [])
+
   return (
     <ErrorBoundary>
-      <MotionConfig reducedMotion="user">
-        <RouterProvider router={router} />
-      </MotionConfig>
+      <ChunkErrorBoundary>
+        <MotionConfig reducedMotion="user">
+          <RouterProvider router={router} />
+        </MotionConfig>
+      </ChunkErrorBoundary>
+      <UpdateBanner />
     </ErrorBoundary>
   )
 }
