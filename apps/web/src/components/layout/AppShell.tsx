@@ -38,7 +38,7 @@ export function AppShell() {
       <AppHeader />
       <div
         id="contenido"
-        className="mx-auto w-full max-w-5xl flex-1 scroll-mt-20 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-5 sm:pb-12"
+        className="mx-auto w-full max-w-5xl min-w-0 flex-1 scroll-mt-20 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-5 sm:pb-12"
       >
         <Outlet />
       </div>

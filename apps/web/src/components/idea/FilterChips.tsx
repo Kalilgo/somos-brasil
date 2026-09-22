@@ -43,6 +43,17 @@ export function FilterChips() {
   const setFilter = useIdeasStore((s) => s.setFilter)
   const categories = useTripsStore((s) => s.categories)
 
+  const statusOptions = [
+    { value: 'all', label: '✨ Todos los estados' },
+    ...(Object.keys(IDEA_STATUSES) as (keyof typeof IDEA_STATUSES)[]).map((st) => ({
+      value: st,
+      label: `${IDEA_STATUSES[st].emoji} ${IDEA_STATUSES[st].label}`,
+    })),
+  ]
+
+  const selectClasses =
+    'w-full cursor-pointer rounded-full border-2 border-ink/10 bg-white px-3 py-2 font-display text-sm font-bold text-ink outline-none focus-visible:ring-2 focus-visible:ring-coral/70 focus:border-coral'
+
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
@@ -72,8 +83,39 @@ export function FilterChips() {
         />
       </div>
 
+      {/* Mobile: dos selectores compactos en una sola fila, sin tanta fila de chips */}
+      <div className="grid grid-cols-2 gap-2 sm:hidden">
+        <select
+          name="filters-status"
+          aria-label="Filtrar por estado"
+          value={filters.status}
+          onChange={(e) => setFilter({ status: e.target.value })}
+          className={selectClasses}
+        >
+          {statusOptions.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <select
+          name="filters-sort"
+          aria-label="Ordenar ideas"
+          value={filters.sort}
+          onChange={(e) => setFilter({ sort: e.target.value as SortKey })}
+          className={selectClasses}
+        >
+          {sortOptions.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Desktop: chips de estado + orden */}
       <div
-        className="flex flex-wrap items-center justify-between gap-2.5"
+        className="hidden flex-wrap items-center justify-between gap-2.5 sm:flex"
         role="group"
         aria-label="Filtrar por estado y orden"
       >

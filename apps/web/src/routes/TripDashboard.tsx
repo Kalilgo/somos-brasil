@@ -56,6 +56,7 @@ export function TripDashboard() {
         {stats.map((s, i) => (
           <motion.div
             key={s.label}
+            className="min-w-0"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
@@ -80,10 +81,10 @@ export function TripDashboard() {
       <div className="mt-4">{tripId && <MemberDates tripId={tripId} />}</div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <h3 className="font-display text-lg font-extrabold text-ink">🎯 Próximos pasos</h3>
-            <span className="text-2xl" aria-hidden>🛫</span>
+        <Card className="min-w-0 p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="min-w-0 font-display text-lg font-extrabold text-ink">🎯 Próximos pasos</h3>
+            <span className="shrink-0 text-2xl" aria-hidden>🛫</span>
           </div>
           <ul className="mt-3 flex flex-col gap-2">
             <Step
@@ -104,7 +105,7 @@ export function TripDashboard() {
           </ul>
         </Card>
 
-        <Card className="p-5">
+        <Card className="min-w-0 p-5">
           <h3 className="font-display text-lg font-extrabold text-ink">
             Últimas movidas del grupo
           </h3>
@@ -115,7 +116,7 @@ export function TripDashboard() {
               </p>
             ) : (
               recent.map((idea) => (
-                <li key={idea.id} className="flex items-center gap-2.5">
+                <li key={idea.id} className="flex min-w-0 items-center gap-2.5">
                   <Avatar user={idea.proposer} size="sm" />
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
                     {idea.proposer?.name} propuso “{idea.title}”
@@ -162,8 +163,8 @@ function Step({ emoji, text, onClick }: { emoji: string; text: string; onClick: 
         className="flex w-full items-center gap-3 rounded-2xl border-2 border-transparent bg-ink/4 px-3.5 py-3 text-left font-semibold text-ink transition hover:border-coral/40 hover:bg-ink/8 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
       >
         <span className="text-xl" aria-hidden>{emoji}</span>
-        <span className="flex-1 text-sm">{text}</span>
-        <span className="text-coral">→</span>
+        <span className="min-w-0 flex-1 text-sm">{text}</span>
+        <span className="shrink-0 text-coral">→</span>
       </button>
     </li>
   )
