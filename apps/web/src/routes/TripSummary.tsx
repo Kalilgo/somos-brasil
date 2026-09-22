@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useParams } from 'react-router'
+import { useParams, useNavigate } from 'react-router'
 import type { TripSummary as Summary } from '@/types/db'
 import { repo } from '@/lib/data'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { Card } from '@/components/ui/Card'
+import { Avatar } from '@/components/ui/Avatar'
 import { toastSuccess } from '@/lib/state/toasts'
 import { useCountUp } from '@/hooks/useCountUp'
+import { formatMemberRange } from '@/lib/utils/tripDates'
+import { cn } from '@/lib/utils/cn'
 
 function Money({ value, currency }: { value: number; currency: string }) {
   const animated = useCountUp(value)
@@ -16,8 +19,15 @@ function Money({ value, currency }: { value: number; currency: string }) {
   return <>{text}</>
 }
 
+function fmtTotal(value: number, currency: string): string {
+  return new Intl.NumberFormat('es-AR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(
+    Math.round(value),
+  )
+}
+
 export function TripSummary() {
   const { tripId } = useParams()
+  const navigate = useNavigate()
   const [summary, setSummary] = useState<Summary | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -36,16 +46,29 @@ export function TripSummary() {
 
   const copySummary = useCallback(() => {
     if (!summary) return
+    const hasShares = summary.payer_total_days > 0
     const lines = [
       `💰 RESUMEN — viaje confirmado · ${summary.confirmed_count} ideas`,
       '',
-      ...summary.totals_per_category.map(
-        (c) => `${c.emoji} ${c.name}: ${c.total == null ? 'a definir' : `${c.total} ${summary.trip_currency}`} (${c.count})`,
-      ),
+      ...summary.members.map((m) => {
+        const days = m.days_present == null ? 'sin fechas' : `${m.days_present} días`
+        const shares = hasShares && summary.per_person.length
+          ? summary.per_person
+              .map((p) =>
+                p.per_day != null && m.days_present != null
+                  ? fmtTotal(p.per_day * m.days_present, p.currency)
+                  : 'a definir',
+              )
+              .join(' · ')
+          : 'aún sin gastos'
+        return `${m.emoji} ${m.name} (${days}): ~${shares}`
+      }),
+      ...(hasShares
+        ? [`Reparto proporcional a ${summary.payer_total_days} días totales entre quienes definieron fechas.`]
+        : ['Todavía no hay reparto: cada uno tiene que definir sus fechas de viaje.']),
       '',
-      ...summary.totals_per_currency.map((t) => `Total ${t.currency}: ${t.total}`),
-      ...summary.per_person.map(
-        (p) => `→ Por persona: ~${p.per_member == null ? 'a definir' : p.per_member.toFixed(0)} ${p.currency}`,
+      ...summary.totals_per_category.map(
+        (c) => `${c.emoji} ${c.name}: ${c.total == null ? 'a definir' : `${fmtTotal(c.total, summary.trip_currency)} (${c.count})`}`,
       ),
       '',
       'Hecho con ❤️ en Somos Brasil',
@@ -67,6 +90,8 @@ export function TripSummary() {
     )
   }
 
+  const hasShares = summary.payer_total_days > 0
+
   return (
     <div>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -80,29 +105,99 @@ export function TripSummary() {
         </button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {summary.per_person.map((p) => (
-          <Card key={p.currency} className="border-2 border-verde/30 bg-verde/8 p-5">
-            <p className="font-display text-sm font-bold uppercase tracking-wide text-verde-dark">
-              ~ Por persona ({p.currency})
+      <Card className="border-2 border-verde/30 bg-verde/8 p-5">
+        <p className="font-display text-sm font-bold uppercase tracking-wide text-verde-dark">
+          💸 Parte de cada uno
+        </p>
+        <p className="mt-1 text-sm font-medium text-ink-soft">
+          El total se reparte proporcional a los días que cada integrante pasa en el viaje. El que
+          está más días paga más.
+        </p>
+
+        {!hasShares ? (
+          <div className="mt-4 rounded-2xl bg-white/70 p-4">
+            <p className="text-sm font-semibold text-ink">
+              Todavía no hay reparto en curso.
             </p>
-            <p className="mt-1 font-display text-4xl font-extrabold text-ink">
-              {p.per_member == null ? '—' : <Money value={p.per_member} currency={p.currency} />}
+            <p className="mt-1 text-sm font-medium text-ink-soft">
+              Cada uno tiene que definir sus fechas de llegada y vuelta para que el costo se divida
+              por los días. Sin fechas, nadie queda incluido en la cuenta.
             </p>
-            <p className="mt-1 text-xs font-medium text-ink-soft">
-              Entre {summary.member_count} integrantes, sin gastos "a definir"
-            </p>
-          </Card>
-        ))}
-        {summary.per_person.length === 0 && (
-          <Card className="p-5">
-            <p className="font-display text-4xl font-extrabold text-ink">$ 0 / 0</p>
-            <p className="mt-1 text-xs font-medium text-ink-soft">
-              Todavía no hay ideas confirmadas con precio.
-            </p>
-          </Card>
+            {tripId && (
+              <button
+                onClick={() => navigate(`/viajes/${tripId}`)}
+                className="mt-3 rounded-full bg-ink px-4 py-2 font-display text-sm font-bold text-white transition-colors hover:bg-ink/90 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+              >
+                Definir mis fechas
+              </button>
+            )}
+          </div>
+        ) : (
+          <ul className="mt-4 flex flex-col gap-2">
+            {summary.members.map((m) => {
+              const shares = summary.per_person.map((p) =>
+                p.per_day != null && m.days_present != null && m.days_present > 0
+                  ? { currency: p.currency, value: p.per_day * m.days_present }
+                  : null,
+              )
+              return (
+                <li
+                  key={m.user_id}
+                  className={cn(
+                    'flex items-center gap-3 rounded-2xl bg-white p-3 shadow-card',
+                    m.days_present == null && 'opacity-70',
+                  )}
+                >
+                  <Avatar user={{ name: m.name, emoji: m.emoji, color: m.color }} size="md" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-sm font-bold text-ink">{m.name}</p>
+                    <p className="text-xs font-medium text-ink-soft">
+                      {m.days_present != null ? (
+                        <>
+                          {m.days_present} {m.days_present === 1 ? 'día' : 'días'}
+                          {m.arrival_date && formatMemberRange(m.arrival_date, m.departure_date) !== ''
+                            ? ` · ${formatMemberRange(m.arrival_date, m.departure_date)}`
+                            : ''}
+                        </>
+                      ) : (
+                        'Sin fechas definidas — no entra en el reparto'
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-0.5">
+                    {m.days_present != null && m.days_present > 0 ? (
+                      shares.length ? (
+                        shares.filter(Boolean).map((s) =>
+                          s ? (
+                            <span
+                              key={s.currency}
+                              className="font-display text-sm font-extrabold text-verde-dark"
+                            >
+                              ~{fmtTotal(s.value, s.currency)}
+                            </span>
+                          ) : null,
+                        )
+                      ) : (
+                        <span className="font-display text-sm font-extrabold text-ink/40">
+                          sin gastos aún
+                        </span>
+                      )
+                    ) : (
+                      <span className="font-display text-xs font-bold text-ink/30">—</span>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
         )}
-      </div>
+
+        {hasShares && (
+          <p className="mt-3 text-xs font-medium text-ink-soft">
+            Reparto sobre {summary.payer_total_days} días totales entre quienes definieron fechas.
+          </p>
+        )}
+      </Card>
 
       <div className="mt-8">
         <h3 className="mb-3 font-display text-xl font-extrabold text-ink">

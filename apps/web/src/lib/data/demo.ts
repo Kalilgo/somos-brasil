@@ -88,78 +88,8 @@ function seedDb(): DemoDb {
     updated_at: iso(3),
   }
 
-  const ideas: Idea[] = [
-    { id: 'i_recife', trip_id: trip.id, category_id: 'c_destino', user_id: 'u_hongo', title: 'Recife + Olinda: el carnaval de verdad', description: 'El carnaval más popular del país, sin turistada. Bloque de frevo hasta las 5am.', link: 'https://example.com/olinda-carnaval', image_url: null, price: null, currency: 'USD', status: 'confirmed', created_at: iso(72), updated_at: iso(3) },
-    { id: 'i_rio', trip_id: trip.id, category_id: 'c_destino', user_id: 'u_gonza', title: 'Río de Janeiro (el clásico)', description: 'Copacabana, Cristo y playa. Más turístico pero nunca falla.', link: null, image_url: null, price: 2400, currency: 'USD', status: 'discussing', created_at: iso(70), updated_at: iso(20) },
-    { id: 'i_salvador', trip_id: trip.id, category_id: 'c_destino', user_id: 'u_flor', title: 'Salvador de Bahía', description: 'Axé y realidad. Vuela el presupuesto pero el carnaval es épico.', link: null, image_url: null, price: 2100, currency: 'USD', status: 'proposal', created_at: iso(68), updated_at: iso(68) },
-    { id: 'i_airbnb', trip_id: trip.id, category_id: 'c_alojamiento', user_id: 'u_gonza', title: 'Airbnb en Olinda frente al mar', description: 'Casa para 8 con pileta. Cierra 45usd/noche por cabeza.', link: 'https://example.com/olinda-airbnb', image_url: null, price: 360, currency: 'USD', status: 'confirmed', created_at: iso(60), updated_at: iso(2) },
-    { id: 'i_pousada', trip_id: trip.id, category_id: 'c_alojamiento', user_id: 'u_dozo', title: 'Pousada dos Sonhos', description: 'Hostel con onda, más barato. No le pidamos pileta.', link: null, image_url: null, price: 28, currency: 'USD', status: 'proposal', created_at: iso(55), updated_at: iso(55) },
-    { id: 'i_boaviagem', trip_id: trip.id, category_id: 'c_alojamiento', user_id: 'u_queme', title: 'Hotel en Boa Viagem (Recife)', description: 'Solo para los días de Recife. Buena playa urbana.', link: null, image_url: null, price: 65, currency: 'USD', status: 'proposal', created_at: iso(50), updated_at: iso(50) },
-    { id: 'i_vuelo', trip_id: trip.id, category_id: 'c_transporte', user_id: 'u_kalil', title: 'Vuelo ida y vuelta EZE → REC', description: 'Directo, maleta despachada. Conseguió precio de cabotaje.', link: 'https://example.com/flight-search', image_url: null, price: 860, currency: 'USD', status: 'confirmed', created_at: iso(48), updated_at: iso(1) },
-    { id: 'i_auto', trip_id: trip.id, category_id: 'c_transporte', user_id: 'u_hongo', title: 'Alquilar auto por 5 días', description: 'Para bajadas a Porto de Galinhas. Repartimos costo.', link: null, image_url: null, price: 320, currency: 'USD', status: 'confirmed', created_at: iso(45), updated_at: iso(5) },
-    { id: 'i_bus', trip_id: trip.id, category_id: 'c_transporte', user_id: 'u_gonza', title: 'Bus nocturno Recife → Salvador', description: 'Ahorras una noche de hotel. Nadie duerme, misión imposible.', link: null, image_url: null, price: 55, currency: 'USD', status: 'proposal', created_at: iso(40), updated_at: iso(40) },
-    { id: 'i_marcozero', trip_id: trip.id, category_id: 'c_lugares', user_id: 'u_flor', title: 'Marco Zero + muñeco de frevo', description: 'El corazon de Recife Antigo. Gratis y obligatorio.', link: null, image_url: null, price: 0, currency: 'USD', status: 'confirmed', created_at: iso(36), updated_at: iso(36) },
-    { id: 'i_boaplaya', trip_id: trip.id, category_id: 'c_lugares', user_id: 'u_dozo', title: 'Praia de Boa Viagem', description: 'Playón urbano con la mejor brisa. Ojo con la marea.', link: null, image_url: null, price: 0, currency: 'USD', status: 'confirmed', created_at: iso(34), updated_at: iso(34) },
-    { id: 'i_olinda', trip_id: trip.id, category_id: 'c_lugares', user_id: 'u_queme', title: 'Olinda: casco histórico', description: 'Cuestas, colores y frevo callejero con los bloques.', link: null, image_url: null, price: 0, currency: 'USD', status: 'discussing', created_at: iso(32), updated_at: iso(32) },
-    { id: 'i_mercado', trip_id: trip.id, category_id: 'c_comida', user_id: 'u_flor', title: 'Almuerzo en el Mercado de São José', description: 'Todo fresco, precio de local.', link: null, image_url: null, price: 12, currency: 'BRL', status: 'confirmed', created_at: iso(28), updated_at: iso(28) },
-    { id: 'i_carne', trip_id: trip.id, category_id: 'c_comida', user_id: 'u_hongo', title: 'Bodega de carne en Boa Viagem', description: 'Picanha que no se olvida. Caro pero el recuerdo no tiene precio.', link: null, image_url: null, price: 8, currency: 'USD', status: 'proposal', created_at: iso(26), updated_at: iso(26) },
-    { id: 'i_acaraje', trip_id: trip.id, category_id: 'c_comida', user_id: 'u_kalil', title: 'Acarajé en Salvador', description: 'Desayuno/merienda santo. Tapatapa en la calle.', link: null, image_url: null, price: 5, currency: 'BRL', status: 'proposal', created_at: iso(24), updated_at: iso(24) },
-    { id: 'i_forro', trip_id: trip.id, category_id: 'c_actividades', user_id: 'u_kalil', title: 'Clase de forró', description: '2 horas con bailarina local. Medio grupo se engancha devuelta.', link: null, image_url: null, price: 20, currency: 'USD', status: 'confirmed', created_at: iso(22), updated_at: iso(22) },
-    { id: 'i_buceo', trip_id: trip.id, category_id: 'c_actividades', user_id: 'u_queme', title: 'Buceo en Porto de Galinhas', description: 'Piscinas naturales con tiburones de arrecife. Incluye equipo y guía.', link: null, image_url: null, price: 95, currency: 'USD', status: 'discussing', created_at: iso(18), updated_at: iso(18) },
-    { id: 'i_frevo', trip_id: trip.id, category_id: 'c_actividades', user_id: 'u_dozo', title: 'Salir con una escuela de frevo', description: 'Dónde duerme una escuela local una noche de carnaval. Bestia.', link: null, image_url: null, price: 30, currency: 'USD', status: 'proposal', created_at: iso(16), updated_at: iso(16) },
-    { id: 'i_seguro', trip_id: trip.id, category_id: 'c_extras', user_id: 'u_hongo', title: 'Seguro de viaje (14 días)', description: 'Cobertura completa, imprescindible para andar tranquilos.', link: 'https://example.com/insurance', image_url: null, price: 60, currency: 'USD', status: 'confirmed', created_at: iso(12), updated_at: iso(12) },
-    { id: 'i_esim', trip_id: trip.id, category_id: 'c_extras', user_id: 'u_queme', title: 'eSIM con datos (15GB)', description: 'Junto al eSIM de cada uno para no depender del wifi.', link: null, image_url: null, price: 25, currency: 'USD', status: 'proposal', created_at: iso(10), updated_at: iso(10) },
-  ]
-
-  const votes: Vote[] = [
-    { id: demoId('v'), idea_id: 'i_recife', user_id: 'u_queme', reaction: '🔥', created_at: iso(2) },
-    { id: demoId('v'), idea_id: 'i_recife', user_id: 'u_flor', reaction: '🔥', created_at: iso(2) },
-    { id: demoId('v'), idea_id: 'i_recife', user_id: 'u_gonza', reaction: '😐', created_at: iso(2) },
-    { id: demoId('v'), idea_id: 'i_rio', user_id: 'u_queme', reaction: '🔥', created_at: iso(20) },
-    { id: demoId('v'), idea_id: 'i_rio', user_id: 'u_hongo', reaction: '🙅', created_at: iso(20) },
-    { id: demoId('v'), idea_id: 'i_airbnb', user_id: 'u_kalil', reaction: '❤️', created_at: iso(1) },
-    { id: demoId('v'), idea_id: 'i_airbnb', user_id: 'u_flor', reaction: '❤️', created_at: iso(1) },
-    { id: demoId('v'), idea_id: 'i_airbnb', user_id: 'u_dozo', reaction: '🔥', created_at: iso(1) },
-    { id: demoId('v'), idea_id: 'i_pousada', user_id: 'u_gonza', reaction: '🔥', created_at: iso(6) },
-    { id: demoId('v'), idea_id: 'i_pousada', user_id: 'u_hongo', reaction: '🔥', created_at: iso(6) },
-    { id: demoId('v'), idea_id: 'i_pousada', user_id: 'u_queme', reaction: '🙅', created_at: iso(6) },
-    { id: demoId('v'), idea_id: 'i_vuelo', user_id: 'u_queme', reaction: '🔥', created_at: iso(1) },
-    { id: demoId('v'), idea_id: 'i_vuelo', user_id: 'u_kalil', reaction: '🔥', created_at: iso(1) },
-    { id: demoId('v'), idea_id: 'i_vuelo', user_id: 'u_flor', reaction: '❤️', created_at: iso(1) },
-    { id: demoId('v'), idea_id: 'i_auto', user_id: 'u_dozo', reaction: '🔥', created_at: iso(4) },
-    { id: demoId('v'), idea_id: 'i_auto', user_id: 'u_kalil', reaction: '🔥', created_at: iso(4) },
-    { id: demoId('v'), idea_id: 'i_buceo', user_id: 'u_gonza', reaction: '❤️', created_at: iso(8) },
-    { id: demoId('v'), idea_id: 'i_buceo', user_id: 'u_kalil', reaction: '❤️', created_at: iso(8) },
-    { id: demoId('v'), idea_id: 'i_buceo', user_id: 'u_flor', reaction: '😐', created_at: iso(8) },
-    { id: demoId('v'), idea_id: 'i_forro', user_id: 'u_queme', reaction: '😐', created_at: iso(5) },
-    { id: demoId('v'), idea_id: 'i_forro', user_id: 'u_gonza', reaction: '🔥', created_at: iso(5) },
-    { id: demoId('v'), idea_id: 'i_acaraje', user_id: 'u_flor', reaction: '🔥', created_at: iso(7) },
-    { id: demoId('v'), idea_id: 'i_marcozero', user_id: 'u_queme', reaction: '🔥', created_at: iso(3) },
-    { id: demoId('v'), idea_id: 'i_mercado', user_id: 'u_dozo', reaction: '❤️', created_at: iso(3) },
-    { id: demoId('v'), idea_id: 'i_esim', user_id: 'u_hongo', reaction: '🔥', created_at: iso(2) },
-  ]
-
-  const comments: IdeaComment[] = [
-    { id: demoId('cm'), idea_id: 'i_airbnb', user_id: 'u_queme', body: '¿Cuántas noches? Si es solo Olinda la hacemos de 10', created_at: iso(1) },
-    { id: demoId('cm'), idea_id: 'i_airbnb', user_id: 'u_gonza', body: '6 noches y después Recife/hostel', created_at: iso(1) },
-    { id: demoId('cm'), idea_id: 'i_recife', user_id: 'u_gonza', body: '¿Pero y la playa? Recife tiene buena playa urbana', created_at: iso(2) },
-    { id: demoId('cm'), idea_id: 'i_buceo', user_id: 'u_dozo', body: 'Tiburoncitos de arrecife no muerden, confíen 🙏', created_at: iso(8) },
-    { id: demoId('cm'), idea_id: 'i_vuelo', user_id: 'u_flor', body: 'Ese precio es un robo, lo cerramos ya', created_at: iso(1) },
-    { id: demoId('cm'), idea_id: 'i_salvador', user_id: 'u_kalil', body: 'El axé me tienta, pero el presupuesto no', created_at: iso(9) },
-    { id: demoId('cm'), idea_id: 'i_pousada', user_id: 'u_hongo', body: 'Yo diría que reservamos como backup si se cae el Airbnb', created_at: iso(6) },
-  ]
-
-  const itinerary: ItineraryItem[] = [
-    { id: demoId('it'), trip_id: trip.id, idea_id: 'i_vuelo', day_number: 1, sort_order: 1, notes: 'Llegada temprano, a no perder la tarde', added_by: 'u_kalil', created_at: iso(3) },
-    { id: demoId('it'), trip_id: trip.id, idea_id: 'i_airbnb', day_number: 1, sort_order: 2, notes: 'Check-in, patear lo que queda del día', added_by: 'u_flor', created_at: iso(3) },
-    { id: demoId('it'), trip_id: trip.id, idea_id: 'i_marcozero', day_number: 2, sort_order: 1, notes: null, added_by: 'u_flor', created_at: iso(3) },
-    { id: demoId('it'), trip_id: trip.id, idea_id: 'i_mercado', day_number: 2, sort_order: 2, notes: 'Almorzar barato y rico', added_by: 'u_flor', created_at: iso(3) },
-    { id: demoId('it'), trip_id: trip.id, idea_id: 'i_boaplaya', day_number: 3, sort_order: 1, notes: null, added_by: 'u_dozo', created_at: iso(3) },
-    { id: demoId('it'), trip_id: trip.id, idea_id: 'i_forro', day_number: 3, sort_order: 2, notes: null, added_by: 'u_kalil', created_at: iso(3) },
-  ]
-
   return {
-    version: 3,
+    version: 4,
     trips: [trip],
     members: DEMO_USERS.map((u) => {
       const dates: Record<string, { arrival_date: string; departure_date: string }> = {
@@ -177,13 +107,11 @@ function seedDb(): DemoDb {
         location: null,
       }
     }),
-    ideas,
-    votes,
-    comments,
-    itinerary,
-    user_badges: [
-      { user_id: 'u_hongo', badge_id: 'b_cazador', earned_at: iso(30) },
-    ],
+    ideas: [],
+    votes: [],
+    comments: [],
+    itinerary: [],
+    user_badges: [],
   }
 }
 
@@ -192,7 +120,7 @@ function loadOrSeed(): DemoDb {
     const raw = localStorage.getItem(LS_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as DemoDb
-      if (parsed.version === 3 && parsed.trips?.length) return parsed
+      if (parsed.version === 4 && parsed.trips?.length) return parsed
     }
   } catch {
     // seed fresh
@@ -358,6 +286,11 @@ class DemoRepo implements DataRepo {
     this.save()
   }
 
+  async removeVote(ideaId: string, userId: string) {
+    this.db.votes = this.db.votes.filter((v) => !(v.idea_id === ideaId && v.user_id === userId))
+    this.save()
+  }
+
   async listComments(ideaId: string) {
     return this.db.comments
       .filter((c) => c.idea_id === ideaId)
@@ -428,9 +361,17 @@ class DemoRepo implements DataRepo {
 
   async getTripSummary(tripId: string) {
     const trip = this.db.trips.find((t) => t.id === tripId)
+    if (!trip) throw new Error('Viaje no encontrado')
     const ideas = this.db.ideas.filter((i) => i.trip_id === tripId)
-    const memberCount = this.db.members.filter((m) => m.trip_id === tripId).length
-    return computeSummary(ideas, DEMO_CATEGORIES, memberCount, trip?.currency ?? 'USD')
+    const plans = this.db.members
+      .filter((m) => m.trip_id === tripId)
+      .map((m) => ({
+        user_id: m.user_id,
+        arrival_date: m.arrival_date,
+        departure_date: m.departure_date,
+        location: m.location,
+      }))
+    return computeSummary(ideas, DEMO_CATEGORIES, trip, plans, DEMO_USERS)
   }
 
   async getLeaderboard(tripId: string): Promise<LeaderboardResult> {

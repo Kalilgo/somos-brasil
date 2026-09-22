@@ -138,7 +138,17 @@ export interface TripSummary {
     count: number
   }[]
   totals_per_currency: { currency: Currency; total: number | null }[]
-  per_person: { currency: Currency; total: number | null; per_member: number | null }[]
+  per_person: { currency: Currency; total: number | null; per_day: number | null }[]
+  payer_total_days: number
+  members: {
+    user_id: string
+    name: string
+    emoji: string
+    color: string
+    arrival_date: string | null
+    departure_date: string | null
+    days_present: number | null
+  }[]
   confirmed_count: number
   member_count: number
   trip_currency: Currency

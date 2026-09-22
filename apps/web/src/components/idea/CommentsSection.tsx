@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/feedback/EmptyState'
+import { fireBurstAt } from '@/components/feedback/Confetti'
 import { repo } from '@/lib/data'
 import { useIdeasStore } from '@/lib/state/ideas'
 import { useAuthStore } from '@/lib/state/auth'
@@ -90,6 +91,8 @@ export function CommentsSection({ ideaId }: { ideaId: string }) {
         className="flex items-center gap-2"
         onSubmit={(e) => {
           e.preventDefault()
+          const rect = e.currentTarget.getBoundingClientRect()
+          fireBurstAt(rect.left + rect.width / 2, rect.top)
           void submit()
         }}
       >

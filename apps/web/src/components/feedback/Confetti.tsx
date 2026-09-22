@@ -29,3 +29,20 @@ export function fireMiniConfetti() {
     origin: { x: 0.5, y: 0.65 },
   })
 }
+
+export function fireBurstAt(clientX: number, clientY: number, strength = 12) {
+  if (prefersReducedMotion()) return
+  const colors = [palette.coral, palette.verde, palette.mango, palette.sky, palette.grape]
+  confetti({
+    particleCount: strength,
+    spread: 70,
+    scalar: 0.75,
+    gravity: 0.85,
+    colors,
+    ticks: 120,
+    origin: {
+      x: Math.max(0.05, Math.min(0.95, clientX / Math.max(1, window.innerWidth))),
+      y: Math.max(0.05, Math.min(0.9, clientY / Math.max(1, window.innerHeight))),
+    },
+  })
+}

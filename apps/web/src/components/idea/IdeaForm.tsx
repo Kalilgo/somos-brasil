@@ -7,7 +7,7 @@ import { useIdeasStore } from '@/lib/state/ideas'
 import { useTripsStore } from '@/lib/state/trips'
 import { useAuthStore } from '@/lib/state/auth'
 import { toastError, toastSuccess } from '@/lib/state/toasts'
-import { fireMiniConfetti } from '@/components/feedback/Confetti'
+import { fireCelebration } from '@/components/feedback/Confetti'
 import type { Category, Currency } from '@/types/db'
 import { cn } from '@/lib/utils/cn'
 
@@ -98,7 +98,7 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
         price: priceNum,
         currency,
       })
-      fireMiniConfetti()
+      fireCelebration(3)
       toastSuccess('Idea sumada al grupo 💡', '🎉')
       onClose()
     } catch (e) {

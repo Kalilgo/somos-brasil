@@ -98,6 +98,7 @@ export const useIdeasStore = create<IdeasState>((set, get) => ({
 
     try {
       if (nextVote) await repo().upsertVote(ideaId, userId, nextVote)
+      else await repo().removeVote(ideaId, userId)
     } catch {
       set((s) => ({
         ideas: s.ideas.map((i) =>

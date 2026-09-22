@@ -213,6 +213,15 @@ class SupabaseRepo implements DataRepo {
     if (error) throw error
   }
 
+  async removeVote(ideaId: string, userId: string) {
+    const { error } = await supabase()
+      .from('votes')
+      .delete()
+      .eq('idea_id', ideaId)
+      .eq('user_id', userId)
+    if (error) throw error
+  }
+
   async listComments(ideaId: string) {
     const { data, error } = await supabase()
       .from('comments')

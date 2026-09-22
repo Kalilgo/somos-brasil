@@ -78,6 +78,7 @@ export interface DataRepo {
   deleteIdea: (ideaId: string) => Promise<void>
 
   upsertVote: (ideaId: string, userId: string, reaction: Reaction) => Promise<void>
+  removeVote: (ideaId: string, userId: string) => Promise<void>
   listComments: (ideaId: string) => Promise<(IdeaComment & { author?: AppUser | null })[]>
   addComment: (ideaId: string, userId: string, body: string) => Promise<IdeaComment>
 

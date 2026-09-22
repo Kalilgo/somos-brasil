@@ -11,13 +11,16 @@ import type {
   AppUser,
   Vote,
 } from '@/types/db'
+import type { MemberPlan } from './types'
 import { SCORE_WEIGHTS } from '@/lib/utils/constants'
+import { memberPresentDays } from '@/lib/utils/tripDates'
 
 export function computeSummary(
   ideas: Idea[],
   categories: Category[],
-  memberCount: number,
-  tripCurrency: Trip['currency'],
+  trip: Trip,
+  members: MemberPlan[],
+  users: AppUser[],
 ): TripSummary {
   const confirmed = ideas.filter((i) => i.status === 'confirmed')
 
@@ -49,21 +52,40 @@ export function computeSummary(
     currency: currency as Trip['currency'],
     total,
   }))
+
+  const membersWithUser = members.map((m) => ({
+    plan: m,
+    user: users.find((u) => u.id === m.user_id) ?? null,
+  }))
+  const memberRows = membersWithUser.map(({ plan, user }) => ({
+    user_id: plan.user_id,
+    name: user?.name ?? 'Integrante',
+    emoji: user?.emoji ?? '🤷',
+    color: user?.color ?? '#000000',
+    arrival_date: plan.arrival_date,
+    departure_date: plan.departure_date,
+    days_present: user ? memberPresentDays(plan, trip) : null,
+  }))
+  const payerTotalDays = memberRows.reduce(
+    (acc, m) => acc + (m.days_present != null && m.days_present > 0 ? m.days_present : 0),
+    0,
+  )
+
   const perPerson = totalsPerCurrency.map((t) => ({
     currency: t.currency,
     total: t.total,
-    per_member: memberCount > 0 ? t.total / memberCount : null,
+    per_day: payerTotalDays > 0 ? t.total / payerTotalDays : null,
   }))
-
-  void tripCurrency
 
   return {
     totals_per_category: totalsPerCategory,
     totals_per_currency: totalsPerCurrency,
     per_person: perPerson,
+    payer_total_days: payerTotalDays,
+    members: memberRows,
     confirmed_count: confirmed.length,
-    member_count: memberCount,
-    trip_currency: tripCurrency,
+    member_count: members.length,
+    trip_currency: trip.currency,
   }
 }
 
