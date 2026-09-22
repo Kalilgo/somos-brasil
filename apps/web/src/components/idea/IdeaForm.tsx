@@ -37,6 +37,7 @@ function validUrl(value: string): boolean {
 
 export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormProps) {
   const categories = useTripsStore((s) => s.categories)
+  const loadCategories = useTripsStore((s) => s.loadCategories)
   const currentUser = useAuthStore((s) => s.currentUser)
   const addIdea = useIdeasStore((s) => s.addIdea)
 
@@ -52,6 +53,7 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
 
   useEffect(() => {
     if (!open) return
+    if (!categories.length) void loadCategories().catch(() => {})
     // oxlint-disable-next-line react/set-state-in-effect -- resetear el form cada vez que se abre
     setTitle('')
     setDescription('')
@@ -63,7 +65,7 @@ export function IdeaForm({ open, onClose, tripId, defaultCategory }: IdeaFormPro
       categories.find((c) => c.slug === defaultCategory || c.id === defaultCategory) ?? categories[0]
     setCategoryId(fallback?.id ?? '')
     setCurrency('USD')
-  }, [open, categories, defaultCategory])
+  }, [open, categories, defaultCategory, loadCategories])
 
   const priceNum = price.trim() === '' ? null : Number(price)
   const priceOk = priceNum === null ? true : Number.isFinite(priceNum) && priceNum >= 0
