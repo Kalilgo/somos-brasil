@@ -18,6 +18,7 @@ import type {
   ItineraryView,
   LeaderboardResult,
   MemberPlan,
+  PushSubscriptionInput,
   SetMemberPlanInput,
 } from './types'
 import { ensureIdeaRelations } from './logic'
@@ -294,6 +295,18 @@ class SupabaseRepo implements DataRepo {
     })
     if (error) throw error
     return data as unknown as LeaderboardResult
+  }
+
+  async savePushSubscription(input: PushSubscriptionInput) {
+    await callMember('upsert_push_subscription', {
+      endpoint: input.endpoint,
+      p256dh: input.p256dh,
+      auth: input.auth,
+    })
+  }
+
+  async deletePushSubscription(endpoint: string) {
+    await callMember('remove_push_subscription', { endpoint })
   }
 }
 

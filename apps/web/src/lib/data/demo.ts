@@ -406,6 +406,14 @@ class DemoRepo implements DataRepo {
     }))
     return { ranking: result.ranking, badges: all, newly_earned: newly }
   }
+
+  async savePushSubscription() {
+    // Sin push en demo: no hay server. Es no-op.
+  }
+
+  async deletePushSubscription() {
+    // Sin push en demo: no hay server. Es no-op.
+  }
 }
 
 let instance: DemoRepo | null = null

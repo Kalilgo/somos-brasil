@@ -34,6 +34,9 @@ export default defineConfig({
     tailwindcss(),
     appVersion(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       includeAssets: ['favicon.svg', 'apple-touch-icon-180x180.png', 'favicon.ico'],
@@ -61,10 +64,13 @@ export default defineConfig({
           },
         ],
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        navigateFallback: 'index.html',
-        navigateFallbackDenylist: [/^\/auth\//],
+        globIgnores: ['**/sw.ts'],
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+      },
+      devOptions: {
+        enabled: false,
       },
     }),
   ],

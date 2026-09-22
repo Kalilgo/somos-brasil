@@ -5,6 +5,7 @@ import { CreateTripModal } from '@/components/trip/CreateTripModal'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { LoadingState } from '@/components/feedback/LoadingState'
+import { PushCard } from '@/components/feedback/PushCard'
 import { useAuthStore } from '@/lib/state/auth'
 import { useTripsStore } from '@/lib/state/trips'
 import { pluralize } from '@/lib/utils/format'
@@ -32,6 +33,8 @@ export function TripsHome() {
           + Crear viaje
         </Button>
       </header>
+
+      <PushCard />
 
       {loadingTrips ? (
         <LoadingState />

@@ -380,6 +380,37 @@ export default {
           return json(200, { ok: true })
         }
 
+        // ============ push ============
+        case 'upsert_push_subscription': {
+          const endpoint = typeof body.endpoint === 'string' ? body.endpoint.trim() : ''
+          const p256dh = typeof body.p256dh === 'string' ? body.p256dh : ''
+          const authKey = typeof body.auth === 'string' ? body.auth : ''
+          if (!endpoint || endpoint.length > 500 || !URL_RE.test(endpoint)) {
+            return json(400, { message: 'Endpoint inválido.' })
+          }
+          if (p256dh.length < 8 || p256dh.length > 256 || authKey.length < 8 || authKey.length > 256) {
+            return json(400, { message: 'Claves de suscripción inválidas.' })
+          }
+          const { error } = await A.from('push_subscriptions').upsert(
+            { user_id: userId, endpoint, p256dh, auth: authKey, updated_at: new Date().toISOString() },
+            { onConflict: 'endpoint' },
+          )
+          if (error) return json(500, { message: error.message })
+          return json(200, { ok: true })
+        }
+
+        case 'remove_push_subscription': {
+          const endpoint = typeof body.endpoint === 'string' ? body.endpoint.trim() : ''
+          if (!endpoint || endpoint.length > 500) return json(400, { message: 'Endpoint inválido.' })
+          const { error } = await A
+            .from('push_subscriptions')
+            .delete()
+            .eq('user_id', userId)
+            .eq('endpoint', endpoint)
+          if (error) return json(500, { message: error.message })
+          return json(200, { ok: true })
+        }
+
         default:
           return json(400, { message: 'Acción desconocida' })
       }

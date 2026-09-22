@@ -89,6 +89,15 @@ export interface DataRepo {
 
   getTripSummary: (tripId: string) => Promise<TripSummary>
   getLeaderboard: (tripId: string) => Promise<LeaderboardResult>
+
+  savePushSubscription: (input: PushSubscriptionInput) => Promise<void>
+  deletePushSubscription: (endpoint: string) => Promise<void>
+}
+
+export interface PushSubscriptionInput {
+  endpoint: string
+  p256dh: string
+  auth: string
 }
 
 export function whereDiscarded(idea: IdeaWithRelations): boolean {
