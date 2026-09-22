@@ -20,7 +20,10 @@ export function AppShell() {
         Saltar al contenido
       </a>
       <AppHeader />
-      <div id="contenido" className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-5 sm:pb-12">
+      <div
+        id="contenido"
+        className="mx-auto w-full max-w-5xl flex-1 scroll-mt-20 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-5 sm:pb-12"
+      >
         <Outlet />
       </div>
       <Toaster />

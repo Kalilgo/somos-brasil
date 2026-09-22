@@ -8,20 +8,20 @@ import { useAuthStore } from '@/lib/state/auth'
 import { useTripsStore } from '@/lib/state/trips'
 import { cn } from '@/lib/utils/cn'
 import { formatShortDate } from '@/lib/utils/format'
-import type { MemberTravelDates } from '@/lib/data/types'
+import type { MemberPlan } from '@/lib/data/types'
 
 export function MemberDates({ tripId }: { tripId: string }) {
   const members = useTripsStore((s) => s.membersByTrip[tripId] ?? [])
-  const dates = useTripsStore((s) => s.memberDatesByTrip[tripId])
+  const plans = useTripsStore((s) => s.memberPlansByTrip[tripId])
   const currentUser = useAuthStore((s) => s.currentUser)
-  const loadMemberDates = useTripsStore((s) => s.loadMemberDates)
+  const loadMemberPlans = useTripsStore((s) => s.loadMemberPlans)
   const [editing, setEditing] = useState(false)
 
   useEffect(() => {
-    void loadMemberDates(tripId).catch(() => {})
-  }, [tripId, loadMemberDates])
+    void loadMemberPlans(tripId).catch(() => {})
+  }, [tripId, loadMemberPlans])
 
-  const byId = useMemo(() => new Map((dates ?? []).map((d) => [d.user_id, d])), [dates])
+  const byId = useMemo(() => new Map((plans ?? []).map((d) => [d.user_id, d])), [plans])
 
   return (
     <Card className="p-5">
@@ -32,33 +32,34 @@ export function MemberDates({ tripId }: { tripId: string }) {
         </span>
       </div>
       <p className="mt-1 text-sm text-ink-soft">
-        Cada uno define sus fechas; no hace falta que todos coincidan con el rango del viaje.
+        Cada uno define sus fechas y dónde va a estar; no hace falta que todos coincidan con el rango
+        del viaje.
       </p>
       <ul className="mt-3 flex flex-col gap-2">
         {members.map((m) => {
           const d = byId.get(m.id)
           const isMe = m.id === currentUser?.id
-          const labeled = d && (d.arrival_date || d.departure_date)
+          const hasDates = d && (d.arrival_date || d.departure_date)
           return (
             <li
               key={m.id}
               className={cn(
-                'flex items-center gap-3 rounded-2xl border-2 bg-ink/4 px-3.5 py-2.5',
+                'flex items-center gap-3 rounded-2xl border-2 bg-ink/4 px-3.5 py-3',
                 isMe ? 'border-coral/40 bg-coral/8' : 'border-transparent',
               )}
             >
               <Avatar user={m} size="sm" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-ink">
+                <p className="flex flex-wrap items-center gap-2 text-sm font-bold text-ink">
                   {m.name}
                   {isMe && (
-                    <span className="ml-2 rounded-full bg-coral/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-coral">
+                    <span className="rounded-full bg-coral/15 px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-coral">
                       Vos
                     </span>
                   )}
                 </p>
                 <p className="text-xs font-medium text-ink-soft">
-                  {labeled ? (
+                  {hasDates ? (
                     <>
                       {d?.arrival_date ? formatShortDate(d.arrival_date) : '…'}{' '}
                       <span className="text-ink/40">→</span>{' '}
@@ -68,9 +69,12 @@ export function MemberDates({ tripId }: { tripId: string }) {
                     'Sin definir'
                   )}
                 </p>
+                {d?.location && (
+                  <p className="mt-0.5 truncate text-xs font-semibold text-verde-dark">📍 {d.location}</p>
+                )}
               </div>
               {isMe && (
-                <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+                <Button variant="ghost" size="md" onClick={() => setEditing(true)}>
                   Editar
                 </Button>
               )}
@@ -91,15 +95,16 @@ export function MemberDates({ tripId }: { tripId: string }) {
 
 interface EditorProps {
   tripId: string
-  initial: MemberTravelDates | null
+  initial: MemberPlan | null
   onClose: () => void
 }
 
 function MemberDatesEditor({ tripId, initial, onClose }: EditorProps) {
   const currentUser = useAuthStore((s) => s.currentUser)
-  const saveMemberDates = useTripsStore((s) => s.saveMemberDates)
+  const saveMemberPlan = useTripsStore((s) => s.saveMemberPlan)
   const [arrival, setArrival] = useState(initial?.arrival_date ?? '')
   const [departure, setDeparture] = useState(initial?.departure_date ?? '')
+  const [location, setLocation] = useState(initial?.location ?? '')
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -113,10 +118,11 @@ function MemberDatesEditor({ tripId, initial, onClose }: EditorProps) {
     setFormError(null)
     setSaving(true)
     try {
-      if (currentUser) await saveMemberDates(tripId, currentUser.id, { arrival_date: a, departure_date: d })
+      if (currentUser)
+        await saveMemberPlan(tripId, currentUser.id, { arrival_date: a, departure_date: d, location })
       onClose()
     } catch {
-      setFormError('No se pudieron guardar las fechas. Probá de nuevo.')
+      setFormError('No se pudieron guardar los datos. Probá de nuevo.')
     } finally {
       setSaving(false)
     }
@@ -126,9 +132,9 @@ function MemberDatesEditor({ tripId, initial, onClose }: EditorProps) {
     <Modal
       open
       onClose={onClose}
-      title="Tus fechas de viaje"
+      title="Tus planes de viaje"
       emoji="🗓️"
-      ariaLabel="Editar tus fechas de viaje"
+      ariaLabel="Editar tus fechas y ubicación de viaje"
       footer={
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>
@@ -142,7 +148,8 @@ function MemberDatesEditor({ tripId, initial, onClose }: EditorProps) {
     >
       <div className="flex flex-col gap-4">
         <p className="text-sm text-ink-soft">
-          Contá cuándo llegás y cuándo te vas. Podés dejar uno vacío si todavía no lo sabés.
+          Contá cuándo llegás, cuándo te vas y dónde vas a estar. Podés dejar en blanco lo que todavía
+          no sabés.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <Input
@@ -158,6 +165,13 @@ function MemberDatesEditor({ tripId, initial, onClose }: EditorProps) {
             onChange={(e) => setDeparture(e.target.value)}
           />
         </div>
+        <Input
+          label="¿Dónde vas a estar?"
+          placeholder="Ej: Olinda, Airbnb frente al mar"
+          value={location}
+          maxLength={80}
+          onChange={(e) => setLocation(e.target.value)}
+        />
         {formError && (
           <p className="rounded-2xl bg-danger/10 px-3.5 py-2.5 text-sm font-medium text-danger" role="alert">
             {formError}

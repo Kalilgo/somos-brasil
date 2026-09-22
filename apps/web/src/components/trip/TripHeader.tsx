@@ -29,7 +29,7 @@ export function TripHeader({
     <section className={cn('mb-5', className)}>
       <Link
         to="/viajes"
-        className="mb-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold text-ink-soft transition-colors hover:bg-ink/5 hover:text-ink"
+        className="mb-2 inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-sm font-semibold text-ink-soft transition-colors hover:bg-ink/5 hover:text-ink"
       >
         ← Mis viajes
       </Link>

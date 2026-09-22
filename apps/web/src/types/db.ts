@@ -32,6 +32,7 @@ export interface TripMember {
   joined_at: string
   arrival_date: string | null
   departure_date: string | null
+  location: string | null
 }
 
 export interface Category {

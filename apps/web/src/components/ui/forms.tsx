@@ -3,7 +3,7 @@ import type { InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes 
 import { cn } from '@/lib/utils/cn'
 
 const fieldBase =
-  'w-full rounded-2xl border-2 border-ink/10 bg-white px-4 py-2.5 font-medium outline-none ' +
+  'w-full rounded-2xl border-2 border-ink/10 bg-white px-4 py-2.5 text-base font-medium outline-none ' +
   'transition-colors placeholder:text-ink/30 focus:border-coral ' +
   'focus-visible:ring-2 focus-visible:ring-coral/40 ' +
   'disabled:opacity-50 aria-invalid:border-danger'

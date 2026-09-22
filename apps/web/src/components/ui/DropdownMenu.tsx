@@ -36,7 +36,7 @@ export function DropdownMenu({ trigger, align = 'end', className, children, aria
         aria-label={ariaLabel}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="outline-none focus-visible:ring-2 focus-visible:ring-coral/70 rounded-full"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-coral/70"
       >
         {trigger}
       </button>
@@ -76,7 +76,7 @@ export function MenuItem({
       role="menuitem"
       onClick={onClick}
       className={cn(
-        'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold text-ink transition-colors hover:bg-ink/5',
+        'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-ink transition-colors hover:bg-ink/5',
         className,
       )}
     >

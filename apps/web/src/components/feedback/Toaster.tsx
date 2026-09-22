@@ -31,7 +31,7 @@ function ToastCard({ id, message, emoji, type }: { id: string; message: string; 
       <button
         onClick={() => dismiss(id)}
         aria-label="Cerrar aviso"
-        className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-white/60 hover:bg-white/15 hover:text-white"
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/60 hover:bg-white/15 hover:text-white"
       >
         ✕
       </button>
@@ -45,7 +45,7 @@ export function Toaster() {
   return createPortal(
     <div
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex flex-col items-center gap-2 px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:inset-x-auto sm:right-4 sm:items-end"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-2 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:inset-x-auto sm:bottom-4 sm:right-4 sm:top-auto sm:items-end sm:pb-4"
     >
       <AnimatePresence>
         {toasts.map((t) => (

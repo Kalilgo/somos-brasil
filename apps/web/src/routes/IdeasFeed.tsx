@@ -63,7 +63,7 @@ export function IdeasFeed() {
         </Button>
       </div>
 
-      <div className="mb-5">
+      <div className="sticky top-[calc(4rem+env(safe-area-inset-top))] z-30 -mx-4 bg-cream/90 px-4 pb-3 pt-2 backdrop-blur-md sm:static sm:z-auto sm:mx-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-0 sm:backdrop-blur-none">
         <FilterChips />
       </div>
 

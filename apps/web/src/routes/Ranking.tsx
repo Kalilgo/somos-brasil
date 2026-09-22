@@ -96,7 +96,7 @@ export function Ranking() {
               <span className="font-display text-2xl font-extrabold text-coral">{row.score}</span>
               <span className="text-xs font-bold text-ink-soft">pts</span>
             </div>
-            <div className="mt-2 flex gap-2 text-[11px] font-bold text-ink-soft">
+            <div className="mt-2 flex gap-2 text-xs font-bold text-ink-soft">
               <span>💡{row.ideas}</span>
               <span>🗳️{row.votes}</span>
               <span>💬{row.comments}</span>
@@ -129,7 +129,7 @@ export function Ranking() {
                 )}
               </div>
               <ProgressBar value={(row.score / maxScore) * 100} color={row.color} className="mt-1.5" />
-              <p className="mt-1 text-[11px] font-bold text-ink-soft">
+              <p className="mt-1 text-xs font-bold text-ink-soft">
                 {row.score} pts · 💡{row.ideas} · 🗳️{row.votes} · 💬{row.comments}
               </p>
             </div>

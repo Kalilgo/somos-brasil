@@ -76,7 +76,7 @@ export function CommentsSection({ ideaId }: { ideaId: string }) {
               <div className="min-w-0 flex-1 rounded-2xl rounded-tl-md bg-ink/4 px-3 py-2">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="font-display text-xs font-bold text-ink">{c.author?.name}</span>
-                  <span className="text-[11px] font-medium text-ink-soft">{timeAgo(c.created_at)}</span>
+                  <span className="text-xs font-medium text-ink-soft">{timeAgo(c.created_at)}</span>
                 </div>
                 <p className="mt-0.5 text-sm leading-relaxed text-ink">{c.body}</p>
               </div>
@@ -102,9 +102,9 @@ export function CommentsSection({ ideaId }: { ideaId: string }) {
           autoComplete="off"
           placeholder="Decile algo al grupo…"
           aria-label="Nuevo comentario"
-          className="h-10 flex-1 rounded-full border-2 border-ink/10 bg-white px-4 text-sm font-medium outline-none transition-colors placeholder:text-ink/30 focus:border-coral focus-visible:ring-2 focus-visible:ring-coral/40"
+          className="h-11 flex-1 rounded-full border-2 border-ink/10 bg-white px-4 text-base font-medium outline-none transition-colors placeholder:text-ink/30 focus:border-coral focus-visible:ring-2 focus-visible:ring-coral/40"
         />
-        <Button type="submit" size="sm" disabled={!text.trim() || posting} loading={posting}>
+        <Button type="submit" size="md" disabled={!text.trim() || posting} loading={posting}>
           Enviar
         </Button>
       </form>

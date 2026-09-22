@@ -84,7 +84,7 @@ export function Itinerary() {
                       toastError(e instanceof Error ? e.message : 'No se pudo agregar'),
                     )
                 }}
-                className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 font-display text-sm font-bold text-ink shadow-card transition-transform active:scale-95"
+                className="flex items-center gap-1.5 rounded-full bg-white px-3 py-2 font-display text-sm font-bold text-ink shadow-card transition-transform active:scale-95"
               >
                 <span aria-hidden>{idea.category?.emoji}</span>
                 {idea.title}
@@ -154,26 +154,26 @@ export function Itinerary() {
                         </div>
                       </div>
 
-                      <div className="flex shrink-0 flex-col items-end gap-1">
+                      <div className="flex shrink-0 flex-col items-end gap-1.5">
                         <div className="flex gap-1">
                           <button
                           onClick={() => void swapWithinDay(item, -1)}
                           aria-label="Subir"
-                          className="grid h-7 w-7 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+                          className="grid h-10 w-10 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
                         >
                           ↑
                         </button>
                         <button
                           onClick={() => void swapWithinDay(item, 1)}
                           aria-label="Bajar"
-                          className="grid h-7 w-7 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+                          className="grid h-10 w-10 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
                         >
                           ↓
                         </button>
                         <button
                           onClick={() => void remove(item.id).catch(() => {})}
                           aria-label="Sacar del itinerario"
-                          className="grid h-7 w-7 place-items-center rounded-lg bg-danger/10 text-sm text-danger hover:bg-danger/20 focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:outline-none"
+                          className="grid h-10 w-10 place-items-center rounded-lg bg-danger/10 text-sm text-danger hover:bg-danger/20 focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:outline-none"
                         >
                           ✕
                         </button>
@@ -184,7 +184,7 @@ export function Itinerary() {
                         autoComplete="off"
                         value={item.day_number}
                         onChange={(e) => void moveToDay(item, Number(e.target.value))}
-                        className="cursor-pointer rounded-lg border border-ink/10 bg-white px-2 py-1 text-xs font-bold text-ink-soft outline-none focus-visible:ring-2 focus-visible:ring-coral/70 focus:border-coral"
+                        className="cursor-pointer rounded-lg border border-ink/10 bg-white px-2 py-1.5 text-sm font-bold text-ink-soft outline-none focus-visible:ring-2 focus-visible:ring-coral/70 focus:border-coral"
                       >
                         {view.days.map((d) => (
                           <option key={d.day_number} value={d.day_number}>
@@ -210,7 +210,7 @@ export function Itinerary() {
             </p>
             <Button
               variant="secondary"
-              size="sm"
+              size="md"
               className="mt-2"
               onClick={() => {
                 if (confirmedOutside.length) {

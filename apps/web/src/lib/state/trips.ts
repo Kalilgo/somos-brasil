@@ -1,22 +1,22 @@
 import { create } from 'zustand'
 import type { AppUser, Category, Trip } from '@/types/db'
 import { repo } from '@/lib/data'
-import type { CreateTripInput, MemberTravelDates, SetMemberDatesInput } from '@/lib/data/types'
+import type { CreateTripInput, MemberPlan, SetMemberPlanInput } from '@/lib/data/types'
 
 interface TripsState {
   trips: Trip[]
   categories: Category[]
   currentTrip: Trip | null
   membersByTrip: Record<string, AppUser[]>
-  memberDatesByTrip: Record<string, MemberTravelDates[]>
+  memberPlansByTrip: Record<string, MemberPlan[]>
   loadingTrips: boolean
   loadingTripId: string | null
   refreshTrips: () => Promise<void>
   loadTrip: (tripId: string) => Promise<Trip | null>
   loadMembers: (tripId: string) => Promise<AppUser[]>
   loadCategories: () => Promise<Category[]>
-  loadMemberDates: (tripId: string) => Promise<MemberTravelDates[]>
-  saveMemberDates: (tripId: string, userId: string, input: SetMemberDatesInput) => Promise<MemberTravelDates>
+  loadMemberPlans: (tripId: string) => Promise<MemberPlan[]>
+  saveMemberPlan: (tripId: string, userId: string, input: SetMemberPlanInput) => Promise<MemberPlan>
   createTrip: (input: CreateTripInput) => Promise<Trip>
   updateTrip: (tripId: string, patch: Partial<Pick<Trip, 'name' | 'description' | 'start_date' | 'end_date' | 'currency'>>) => Promise<Trip>
 }
@@ -26,7 +26,7 @@ export const useTripsStore = create<TripsState>((set, get) => ({
   categories: [],
   currentTrip: null,
   membersByTrip: {},
-  memberDatesByTrip: {},
+  memberPlansByTrip: {},
   loadingTrips: false,
   loadingTripId: null,
 
@@ -59,21 +59,21 @@ export const useTripsStore = create<TripsState>((set, get) => ({
     return members
   },
 
-  loadMemberDates: async (tripId) => {
-    const cached = get().memberDatesByTrip[tripId]
+  loadMemberPlans: async (tripId) => {
+    const cached = get().memberPlansByTrip[tripId]
     if (cached) return cached
-    const dates = await repo().listMemberDates(tripId)
-    set((s) => ({ memberDatesByTrip: { ...s.memberDatesByTrip, [tripId]: dates } }))
-    return dates
+    const plans = await repo().listMemberPlans(tripId)
+    set((s) => ({ memberPlansByTrip: { ...s.memberPlansByTrip, [tripId]: plans } }))
+    return plans
   },
 
-  saveMemberDates: async (tripId, userId, input) => {
-    const saved = await repo().setMemberDates(tripId, userId, input)
+  saveMemberPlan: async (tripId, userId, input) => {
+    const saved = await repo().setMemberPlan(tripId, userId, input)
     set((s) => {
-      const current = s.memberDatesByTrip[tripId] ?? []
+      const current = s.memberPlansByTrip[tripId] ?? []
       const next = current.map((d) => (d.user_id === userId ? saved : d))
       if (!next.some((d) => d.user_id === userId)) next.push(saved)
-      return { memberDatesByTrip: { ...s.memberDatesByTrip, [tripId]: next } }
+      return { memberPlansByTrip: { ...s.memberPlansByTrip, [tripId]: next } }
     })
     return saved
   },

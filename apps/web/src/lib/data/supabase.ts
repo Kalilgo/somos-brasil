@@ -17,8 +17,8 @@ import type {
   ItineraryRow,
   ItineraryView,
   LeaderboardResult,
-  MemberTravelDates,
-  SetMemberDatesInput,
+  MemberPlan,
+  SetMemberPlanInput,
 } from './types'
 import { ensureIdeaRelations } from './logic'
 import { supabase } from '@/lib/supabase/client'
@@ -107,25 +107,29 @@ class SupabaseRepo implements DataRepo {
     return users
   }
 
-  async listMemberDates(tripId: string): Promise<MemberTravelDates[]> {
+  async listMemberPlans(tripId: string): Promise<MemberPlan[]> {
     const { data, error } = await supabase()
       .from('trip_members')
-      .select('user_id, arrival_date, departure_date')
+      .select('user_id, arrival_date, departure_date, location')
       .eq('trip_id', tripId)
     if (error) throw error
-    return data as MemberTravelDates[]
+    return data as MemberPlan[]
   }
 
-  async setMemberDates(tripId: string, userId: string, input: SetMemberDatesInput): Promise<MemberTravelDates> {
+  async setMemberPlan(tripId: string, userId: string, input: SetMemberPlanInput): Promise<MemberPlan> {
     const { data, error } = await supabase()
       .from('trip_members')
-      .update({ arrival_date: input.arrival_date ?? null, departure_date: input.departure_date ?? null })
+      .update({
+        arrival_date: input.arrival_date ?? null,
+        departure_date: input.departure_date ?? null,
+        location: input.location?.trim() ? input.location.trim() : null,
+      })
       .eq('trip_id', tripId)
       .eq('user_id', userId)
-      .select('user_id, arrival_date, departure_date')
+      .select('user_id, arrival_date, departure_date, location')
       .single()
     if (error) throw error
-    return data as MemberTravelDates
+    return data as MemberPlan
   }
 
   async listIdeas(tripId: string) {

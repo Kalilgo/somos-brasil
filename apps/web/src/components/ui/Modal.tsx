@@ -99,14 +99,16 @@ export function Modal({ open, onClose, title, emoji, children, footer, size = 'm
               <button
                 onClick={onClose}
                 aria-label="Cerrar"
-                className="grid h-9 w-9 place-items-center rounded-full bg-ink/5 text-lg text-ink-soft transition-colors hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+                className="grid h-11 w-11 place-items-center rounded-full bg-ink/5 text-lg text-ink-soft transition-colors hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
               >
                 ✕
               </button>
             </div>
             <div className="overflow-y-auto overscroll-contain px-5 py-3">{children}</div>
             {footer && (
-              <div className="border-t border-ink/5 px-5 py-4">{footer}</div>
+              <div className="border-t border-ink/5 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                {footer}
+              </div>
             )}
           </motion.div>
         </div>

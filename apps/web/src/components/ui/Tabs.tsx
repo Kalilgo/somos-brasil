@@ -1,4 +1,4 @@
-import { useRef, type KeyboardEvent } from 'react'
+import { useEffect, useRef, type KeyboardEvent } from 'react'
 import { motion } from 'motion/react'
 import { cn } from '@/lib/utils/cn'
 
@@ -18,6 +18,11 @@ export interface TabsProps {
 export function Tabs({ items, value, onChange, className }: TabsProps) {
   const listRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    const activeEl = listRef.current?.querySelector<HTMLButtonElement>('[role="tab"][aria-selected="true"]')
+    activeEl?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  }, [value])
+
   const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
     let next = index
     if (e.key === 'ArrowRight') next = (index + 1) % items.length
@@ -33,46 +38,48 @@ export function Tabs({ items, value, onChange, className }: TabsProps) {
   }
 
   return (
-    <div
-      ref={listRef}
-      role="tablist"
-      aria-label="Secciones del viaje"
-      aria-orientation="horizontal"
-      className={cn(
-        'flex gap-1.5 overflow-x-auto rounded-full bg-ink/5 p-1.5 no-scrollbar sm:max-w-fit',
-        className,
-      )}
-    >
-      {items.map((item, index) => {
-        const active = item.value === value
-        return (
-          <button
-            key={item.value}
-            role="tab"
-            tabIndex={active ? 0 : -1}
-            aria-selected={active}
-            onClick={() => onChange(item.value)}
-            onKeyDown={(e) => onKeyDown(e, index)}
-            className={cn(
-              'relative whitespace-nowrap rounded-full px-4 py-2 font-display text-sm font-semibold outline-none transition-colors',
-              'focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none',
-              active ? 'text-white' : 'text-ink-soft hover:text-ink',
-            )}
-          >
-            {active && (
-              <motion.span
-                layoutId="tab-pill"
-                className="absolute inset-0 rounded-full bg-ink shadow-card"
-                transition={{ type: 'spring', damping: 28, stiffness: 400 }}
-              />
-            )}
-            <span className="relative z-10 flex items-center gap-1.5">
-              {item.emoji && <span aria-hidden>{item.emoji}</span>}
-              {item.label}
-            </span>
-          </button>
-        )
-      })}
+    <div className="relative sm:max-w-fit">
+      <div
+        ref={listRef}
+        role="tablist"
+        aria-label="Secciones del viaje"
+        aria-orientation="horizontal"
+        className={cn(
+          'flex gap-1.5 overflow-x-auto rounded-full bg-ink/5 p-1.5 no-scrollbar',
+          className,
+        )}
+      >
+        {items.map((item, index) => {
+          const active = item.value === value
+          return (
+            <button
+              key={item.value}
+              role="tab"
+              tabIndex={active ? 0 : -1}
+              aria-selected={active}
+              onClick={() => onChange(item.value)}
+              onKeyDown={(e) => onKeyDown(e, index)}
+              className={cn(
+                'relative flex min-h-11 items-center whitespace-nowrap rounded-full px-4 py-2 font-display text-sm font-semibold outline-none transition-colors',
+                'focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none',
+                active ? 'text-white' : 'text-ink-soft hover:text-ink',
+              )}
+            >
+              {active && (
+                <motion.span
+                  layoutId="tab-pill"
+                  className="absolute inset-0 rounded-full bg-ink shadow-card"
+                  transition={{ type: 'spring', damping: 28, stiffness: 400 }}
+                />
+              )}
+              <span className="relative z-10 flex items-center gap-1.5">
+                {item.emoji && <span aria-hidden>{item.emoji}</span>}
+                {item.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

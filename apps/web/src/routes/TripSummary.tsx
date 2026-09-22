@@ -74,7 +74,7 @@ export function TripSummary() {
         <button
           type="button"
           onClick={copySummary}
-          className="rounded-full bg-ink px-4 py-2 font-display text-sm font-bold text-white transition-transform active:scale-95 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:ring-offset-2 focus-visible:ring-offset-cream focus-visible:outline-none"
+          className="min-h-11 rounded-full bg-ink px-4 py-2 font-display text-sm font-bold text-white transition-transform active:scale-95 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:ring-offset-2 focus-visible:ring-offset-cream focus-visible:outline-none"
         >
           📋 Copiar para el grupo
         </button>
@@ -135,7 +135,7 @@ export function TripSummary() {
                   <p className="font-display text-lg font-extrabold text-ink">
                     {c.total == null ? '—' : <Money value={c.total} currency={summary.trip_currency} />}
                   </p>
-                  <p className="text-[11px] font-medium text-ink-soft">{summary.trip_currency}</p>
+                  <p className="text-xs font-medium text-ink-soft">{summary.trip_currency}</p>
                 </div>
               </Card>
             ))}

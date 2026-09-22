@@ -63,8 +63,16 @@
       radial-gradient(circle at 12% 8%, rgb(255 201 60 / 0.22), transparent 38%),
       radial-gradient(circle at 88% 12%, rgb(0 168 120 / 0.12), transparent 34%),
       radial-gradient(circle at 50% 95%, rgb(255 90 95 / 0.12), transparent 42%);
-    background-attachment: fixed;
+    background-attachment: scroll;
+    min-height: 100vh;
     min-height: 100dvh;
+    overflow-x: clip;
+  }
+
+  @media (min-width: 768px) {
+    body {
+      background-attachment: fixed;
+    }
   }
 
   ::selection {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, useParams } from 'react-router'
 import { TripHeader } from '@/components/trip/TripHeader'
 import { SectionNav } from '@/components/trip/SectionNav'
+import { BottomNav } from '@/components/layout/BottomNav'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { useTripsStore } from '@/lib/state/trips'
@@ -46,10 +47,11 @@ export function TripLayout() {
       ) : (
         <>
           <TripHeader trip={trip} members={members ?? []} />
-          <SectionNav />
+          <SectionNav className="hidden sm:flex" />
           <div className="mt-5">
             <Outlet />
           </div>
+          <BottomNav />
         </>
       )}
     </div>

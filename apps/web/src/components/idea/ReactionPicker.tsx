@@ -28,7 +28,7 @@ export function ReactionPicker({ counts, myVote, onVote, disabled }: ReactionPic
             aria-label={`${label}${count ? `: ${count}` : ''}`}
             aria-pressed={active}
             className={cn(
-              'flex min-w-11 items-center justify-center gap-1.5 rounded-full border-2 px-3 py-1.5 font-display text-base transition-colors',
+              'flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border-2 px-3 py-2 font-display text-base transition-colors',
               'disabled:pointer-events-none disabled:opacity-50',
               'focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none',
               active

@@ -27,7 +27,7 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 font-display text-sm font-bold transition',
+        'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 font-display text-sm font-bold transition',
         'focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none',
         active ? 'text-white shadow-md' : 'bg-white text-ink-soft hover:text-ink border-2 border-ink/10',
       )}
@@ -45,25 +45,31 @@ export function FilterChips() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div
-        role="group"
-        aria-label="Filtrar por categoría"
-        className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5"
-      >
-        <Chip active={filters.category === 'all'} onClick={() => setFilter({ category: 'all' })} color="#33201a">
-          🧺 Todo
-        </Chip>
-        {categories.map((c) => (
-          <Chip
-            key={c.id}
-            active={filters.category === c.id || filters.category === c.slug}
-            onClick={() => setFilter({ category: c.id })}
-            color={c.color}
-          >
-            <span aria-hidden>{c.emoji}</span>
-            {c.name}
+      <div className="relative">
+        <div
+          role="group"
+          aria-label="Filtrar por categoría"
+          className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5"
+        >
+          <Chip active={filters.category === 'all'} onClick={() => setFilter({ category: 'all' })} color="#33201a">
+            🧺 Todo
           </Chip>
-        ))}
+          {categories.map((c) => (
+            <Chip
+              key={c.id}
+              active={filters.category === c.id || filters.category === c.slug}
+              onClick={() => setFilter({ category: c.id })}
+              color={c.color}
+            >
+              <span aria-hidden>{c.emoji}</span>
+              {c.name}
+            </Chip>
+          ))}
+        </div>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-cream to-transparent"
+        />
       </div>
 
       <div
@@ -96,7 +102,7 @@ export function FilterChips() {
             name="sort"
             value={filters.sort}
             onChange={(e) => setFilter({ sort: e.target.value as SortKey })}
-            className="cursor-pointer rounded-full border-2 border-ink/10 bg-white px-3 py-1.5 font-display text-sm font-bold text-ink outline-none focus-visible:ring-2 focus-visible:ring-coral/70 focus:border-coral"
+            className="cursor-pointer rounded-full border-2 border-ink/10 bg-white px-3 py-2 font-display text-base font-bold text-ink outline-none focus-visible:ring-2 focus-visible:ring-coral/70 focus:border-coral"
           >
             {sortOptions.map((o) => (
               <option key={o.value} value={o.value}>

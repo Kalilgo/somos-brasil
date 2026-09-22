@@ -116,7 +116,7 @@ export function UserSelector() {
                   >
                     {user.name}
                     {active && (
-                      <span className="rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide">
+                      <span className="rounded-full bg-white/15 px-1.5 py-0.5 text-xs font-extrabold uppercase tracking-wide">
                         Vos
                       </span>
                     )}

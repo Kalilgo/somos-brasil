@@ -19,8 +19,8 @@ import type {
   ItineraryRow,
   ItineraryView,
   LeaderboardResult,
-  MemberTravelDates,
-  SetMemberDatesInput,
+  MemberPlan,
+  SetMemberPlanInput,
 } from './types'
 import {
   computeLeaderboard,
@@ -76,12 +76,12 @@ interface DemoDb {
 function seedDb(): DemoDb {
   const trip: Trip = {
     id: 't_brasil2026',
-    name: 'Brasil 2026: Carnaval',
+    name: 'Brasil 2026/27: Fin de año',
     description:
-      'Gran candidato: Recife + Olinda en carnaval, con un ojo en Salvador. Fechas tentativas para Febrero.',
+      'Recife + Olinda para el Reveillon, con un ojo en Salvador. Del 26 de diciembre al 4 de enero.',
     currency: 'USD',
-    start_date: '2026-02-10',
-    end_date: '2026-02-24',
+    start_date: '2026-12-26',
+    end_date: '2027-01-04',
     status: 'planning',
     created_by: 'u_queme',
     created_at: iso(96),
@@ -159,15 +159,13 @@ function seedDb(): DemoDb {
   ]
 
   return {
-    version: 2,
+    version: 3,
     trips: [trip],
     members: DEMO_USERS.map((u) => {
       const dates: Record<string, { arrival_date: string; departure_date: string }> = {
-        u_queme: { arrival_date: '2026-02-11', departure_date: '2026-02-23' },
-        u_flor: { arrival_date: '2026-02-10', departure_date: '2026-02-17' },
-        u_dozo: { arrival_date: '2026-02-13', departure_date: '2026-02-24' },
-        u_hongo: { arrival_date: '2026-02-16', departure_date: '2026-02-24' },
-        u_kalil: { arrival_date: '2026-02-10', departure_date: '2026-02-14' },
+        u_dozo: { arrival_date: '2026-12-28', departure_date: '2027-01-04' },
+        u_hongo: { arrival_date: '2026-12-27', departure_date: '2027-01-02' },
+        u_gonza: { arrival_date: '2026-12-26', departure_date: '2027-01-04' },
       }
       const d = dates[u.id]
       return {
@@ -176,6 +174,7 @@ function seedDb(): DemoDb {
         joined_at: iso(96),
         arrival_date: d?.arrival_date ?? null,
         departure_date: d?.departure_date ?? null,
+        location: null,
       }
     }),
     ideas,
@@ -193,7 +192,7 @@ function loadOrSeed(): DemoDb {
     const raw = localStorage.getItem(LS_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as DemoDb
-      if (parsed.version === 2 && parsed.trips?.length) return parsed
+      if (parsed.version === 3 && parsed.trips?.length) return parsed
     }
   } catch {
     // seed fresh
@@ -260,7 +259,7 @@ class DemoRepo implements DataRepo {
     }
     this.db.trips.push(trip)
     for (const userId of input.memberIds) {
-      this.db.members.push({ trip_id: trip.id, user_id: userId, joined_at: now(), arrival_date: null, departure_date: null })
+      this.db.members.push({ trip_id: trip.id, user_id: userId, joined_at: now(), arrival_date: null, departure_date: null, location: null })
     }
     this.save()
     return trip
@@ -279,19 +278,20 @@ class DemoRepo implements DataRepo {
     return DEMO_USERS.filter((u) => ids.includes(u.id)).sort((a, b) => a.sort_order - b.sort_order)
   }
 
-  async listMemberDates(tripId: string): Promise<MemberTravelDates[]> {
+  async listMemberPlans(tripId: string): Promise<MemberPlan[]> {
     return this.db.members
       .filter((m) => m.trip_id === tripId)
-      .map((m) => ({ user_id: m.user_id, arrival_date: m.arrival_date, departure_date: m.departure_date }))
+      .map((m) => ({ user_id: m.user_id, arrival_date: m.arrival_date, departure_date: m.departure_date, location: m.location }))
   }
 
-  async setMemberDates(tripId: string, userId: string, input: SetMemberDatesInput): Promise<MemberTravelDates> {
+  async setMemberPlan(tripId: string, userId: string, input: SetMemberPlanInput): Promise<MemberPlan> {
     const member = this.db.members.find((m) => m.trip_id === tripId && m.user_id === userId)
     if (!member) throw new Error('No sos parte de este viaje')
     member.arrival_date = input.arrival_date ?? null
     member.departure_date = input.departure_date ?? null
+    member.location = input.location?.trim() ? input.location.trim() : null
     this.save()
-    return { user_id: member.user_id, arrival_date: member.arrival_date, departure_date: member.departure_date }
+    return { user_id: member.user_id, arrival_date: member.arrival_date, departure_date: member.departure_date, location: member.location }
   }
 
   private buildRelations(tripId: string) {

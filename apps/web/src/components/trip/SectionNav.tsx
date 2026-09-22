@@ -1,5 +1,6 @@
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { Tabs, type TabItem } from '@/components/ui/Tabs'
+import { cn } from '@/lib/utils/cn'
 
 const items: TabItem[] = [
   { value: 'inicio', label: 'Inicio', emoji: '🏠' },
@@ -9,7 +10,7 @@ const items: TabItem[] = [
   { value: 'ranking', label: 'Ranking', emoji: '🏆' },
 ]
 
-export function SectionNav() {
+export function SectionNav({ className }: { className?: string }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { tripId } = useParams()
@@ -21,7 +22,7 @@ export function SectionNav() {
       items={items}
       value={active}
       onChange={(v) => navigate(v === 'inicio' ? `/viajes/${tripId}` : `/viajes/${tripId}/${v}`)}
-      className="mx-auto w-full justify-start sm:justify-center"
+      className={cn('mx-auto w-full justify-start sm:justify-center', className)}
     />
   )
 }
