@@ -61,11 +61,16 @@ class SupabaseRepo implements DataRepo {
   }
 
   async createTrip(input: CreateTripInput) {
+    const name = input.name.trim()
     const userId = input.memberIds[0]
+    if (name.length < 2) throw new Error('El nombre del viaje necesita al menos 2 letras.')
+    if (!userId || new Set(input.memberIds).size !== input.memberIds.length) {
+      throw new Error('Faltan integrantes del viaje o hay repetidos.')
+    }
     const { data: trip, error } = await supabase()
       .from('trips')
       .insert({
-        name: input.name.trim(),
+        name,
         description: input.description?.trim() || null,
         currency: input.currency,
         start_date: input.start_date || null,
@@ -170,8 +175,15 @@ class SupabaseRepo implements DataRepo {
   }
 
   async createIdea(input: CreateIdeaInput) {
+    const title = input.title.trim()
     if (!input.category_id) {
       throw new Error('Falta elegir una categoría para la idea.')
+    }
+    if (title.length < 3) {
+      throw new Error('El título de la idea necesita al menos 3 caracteres.')
+    }
+    if (input.price != null && (!Number.isFinite(input.price) || input.price < 0)) {
+      throw new Error('El precio tiene que ser un número ≥ 0.')
     }
     const { data, error } = await supabase()
       .from('ideas')
@@ -179,7 +191,7 @@ class SupabaseRepo implements DataRepo {
         trip_id: input.trip_id,
         category_id: input.category_id,
         user_id: input.user_id,
-        title: input.title.trim(),
+        title,
         description: input.description?.trim() || null,
         link: input.link?.trim() || null,
         image_url: input.image_url?.trim() || null,
@@ -236,9 +248,11 @@ class SupabaseRepo implements DataRepo {
   }
 
   async addComment(ideaId: string, userId: string, body: string) {
+    const clean = body.trim()
+    if (!clean) throw new Error('El comentario no puede estar vacío.')
     const { data, error } = await supabase()
       .from('comments')
-      .insert({ idea_id: ideaId, user_id: userId, body: body.trim() })
+      .insert({ idea_id: ideaId, user_id: userId, body: clean })
       .select()
       .single()
     if (error) throw error
