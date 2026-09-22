@@ -38,6 +38,9 @@ en las queries con RLS permisiva.
 
 ## Deploy
 
+> 🧑‍💻 **¿No sabés cómo?** Seguí el [manual paso a paso para no técnicos](docs/MANUAL_DEPLOY.md)
+> (git + Supabase + Vercel desde cero, todo desde las páginas web).
+
 ### 1. Backend (Supabase)
 
 Requisitos: CLI de Supabase logueado (`supabase login`).
