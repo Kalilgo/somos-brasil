@@ -1,9 +1,11 @@
 import { Link } from 'react-router'
 import { LegalProse, LegalSectionTitle } from '@/routes/legal/LegalLayout'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 const CONTACT = 'legal@somosbrasil.app'
 
 export function PrivacyPage() {
+  useDocumentTitle('Privacidad')
   return (
     <LegalProse>
       <div>

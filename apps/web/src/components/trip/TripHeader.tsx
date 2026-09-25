@@ -2,19 +2,8 @@ import { Link } from 'react-router'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import type { AppUser, Trip } from '@/types/db'
-import { pluralize } from '@/lib/utils/format'
+import { formatTripRange, pluralize } from '@/lib/utils/format'
 import { cn } from '@/lib/utils/cn'
-
-function formatRange(t: Trip): string {
-  if (!t.start_date && !t.end_date) return 'Fechas por definir'
-  if (t.start_date && t.end_date) {
-    const s = t.start_date.slice(8, 10)
-    const m = new Date(`${t.start_date}T00:00:00`).toLocaleDateString('es-AR', { month: 'short' })
-    const em = new Date(`${t.end_date}T00:00:00`).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })
-    return `${s} ${m} → ${em}`
-  }
-  return t.start_date ?? t.end_date ?? ''
-}
 
 export function TripHeader({
   trip,
@@ -46,7 +35,7 @@ export function TripHeader({
           )}
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Badge tone="category" className="text-sm">
-              📅 {formatRange(trip)}
+              📅 {formatTripRange(trip.start_date, trip.end_date)}
             </Badge>
             <Badge tone="category" className="text-sm">
               💵 {trip.currency}

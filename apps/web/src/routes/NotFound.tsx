@@ -1,7 +1,9 @@
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/Button'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export function NotFound() {
+  useDocumentTitle('Página no encontrada')
   return (
     <div className="flex flex-col items-center py-20 text-center">
       <span className="animate-wiggle inline-block text-6xl" aria-hidden>

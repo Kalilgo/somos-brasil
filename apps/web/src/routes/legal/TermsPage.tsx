@@ -1,8 +1,10 @@
 import { LegalProse, LegalSectionTitle } from '@/routes/legal/LegalLayout'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 const CONTACT = 'legal@somosbrasil.app'
 
 export function TermsPage() {
+  useDocumentTitle('Términos y condiciones')
   return (
     <LegalProse>
       <div>

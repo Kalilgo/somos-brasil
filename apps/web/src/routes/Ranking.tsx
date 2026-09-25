@@ -47,6 +47,7 @@ export function Ranking() {
   if (!result || result.ranking.length === 0) {
     return (
       <EmptyState
+        as="h2"
         emoji="🏆"
         title="Sin ranking todavía"
         cta="Proponé, votá y comentá para prendér tu fueguito en el leaderboard."

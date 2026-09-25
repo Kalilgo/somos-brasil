@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { LOADING_MESSAGES } from '@/lib/utils/constants'
 
-export function LoadingState({ label = 'Cargando...' }: { label?: string }) {
+export function LoadingState({ label = 'Cargando…' }: { label?: string }) {
   const [idx, setIdx] = useState(0)
 
   useEffect(() => {

@@ -5,6 +5,7 @@ import type { AppUser } from '@/types/db'
 import { repo, isDemoMode } from '@/lib/data'
 import { useAuthStore } from '@/lib/state/auth'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { toastError, toastSuccess } from '@/lib/state/toasts'
 import { fireCelebration } from '@/components/feedback/Confetti'
 import { Modal } from '@/components/ui/Modal'
@@ -36,6 +37,8 @@ export function UserSelector() {
   const [pinUser, setPinUser] = useState<AppUser | null>(null)
   const [pin, setPin] = useState('')
   const [pinBusy, setPinBusy] = useState(false)
+
+  useDocumentTitle('¿Quién está viendo?')
 
   useEffect(() => {
     let alive = true
@@ -291,7 +294,7 @@ export function UserSelector() {
             className="rounded-xl border-2 border-ink/10 px-4 py-3 font-display text-lg font-bold tracking-[0.3em] text-ink outline-none transition-colors focus:border-coral/60 focus-visible:ring-2 focus-visible:ring-coral/60"
           />
           <Button type="submit" disabled={pinBusy || pin.length === 0} className="shadow-pop">
-            {pinBusy ? 'Entrando...' : 'Entrar 🎉'}
+            {pinBusy ? 'Entrando…' : 'Entrar 🎉'}
           </Button>
         </form>
       </Modal>

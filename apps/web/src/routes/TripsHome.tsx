@@ -9,6 +9,7 @@ import { PushCard } from '@/components/feedback/PushCard'
 import { useAuthStore } from '@/lib/state/auth'
 import { useTripsStore } from '@/lib/state/trips'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { pluralize } from '@/lib/utils/format'
 
 export function TripsHome() {
@@ -16,6 +17,8 @@ export function TripsHome() {
   const { trips, loadingTrips, refreshTrips, loadCategories } = useTripsStore()
   const [creating, setCreating] = useState(false)
   const [loadError, setLoadError] = useState(false)
+
+  useDocumentTitle('Mis viajes')
 
   useEffect(() => {
     let alive = true
@@ -50,6 +53,7 @@ export function TripsHome() {
         <LoadingState />
       ) : loadError ? (
         <EmptyState
+          as="h2"
           emoji="📡"
           title="No pudimos cargar los viajes"
           cta="Puede ser la conexión o que la app esté caída un ratito."
@@ -61,6 +65,7 @@ export function TripsHome() {
         />
       ) : trips.length === 0 ? (
         <EmptyState
+          as="h2"
           emoji="🏝️"
           title="No hay viajes todavía"
           cta="Creá el primero y juntemos al grupo para el próximo destino."

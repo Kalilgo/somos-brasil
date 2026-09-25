@@ -70,6 +70,8 @@
   html {
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
+    /* Mata el delay de 300ms del double-tap-to-zoom en Android sin romper el scroll. */
+    touch-action: manipulation;
   }
 
   body {

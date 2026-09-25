@@ -1,5 +1,27 @@
 const priceFmts = new Map<string, Intl.NumberFormat>()
 const dateFmt = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' })
+const dayMonthYearFmt = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short', year: 'numeric' })
+const monthYearFmt = new Intl.DateTimeFormat('es-AR', { month: 'short', year: 'numeric' })
+
+function parseDay(iso: string | null | undefined): Date | null {
+  if (!iso) return null
+  const d = new Date(`${iso}T00:00:00`)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+/** "5 → 8 ene 2027", "20 ene → 8 feb 2027", "8 ene 2027". Siempre con año. */
+export function formatTripRange(start: string | null | undefined, end: string | null | undefined): string {
+  const s = parseDay(start)
+  const e = parseDay(end)
+  if (!s && !e) return 'Fechas por definir'
+  if (s && e) {
+    if (s.getTime() === e.getTime()) return dayMonthYearFmt.format(s)
+    const sameMonth = s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth()
+    if (sameMonth) return `${s.getDate()} → ${e.getDate()} ${monthYearFmt.format(e)}`
+    return `${dateFmt.format(s)} → ${dayMonthYearFmt.format(e)}`
+  }
+  return dayMonthYearFmt.format((s ?? e) as Date)
+}
 
 export function formatShortDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`)

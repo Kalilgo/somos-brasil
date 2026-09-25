@@ -89,6 +89,7 @@ export function IdeasFeed() {
         <LoadingState />
       ) : filtered.length === 0 ? (
         <EmptyState
+          as="h2"
           emoji="🦜"
           title={filters.status === 'discarded' ? 'Nada descartado por acá' : 'Todavía no hay nada por acá'}
           cta={

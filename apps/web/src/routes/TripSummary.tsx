@@ -97,6 +97,7 @@ export function TripSummary() {
   if (!summary) {
     return (
       <EmptyState
+        as="h2"
         emoji="🧮"
         title="No pudimos calcular el resumen"
         cta="Puede ser un problema de conexión. Reintentá o confirmá algunas ideas con precio."
@@ -221,6 +222,7 @@ export function TripSummary() {
         </h3>
         {summary.totals_per_category.length === 0 ? (
           <EmptyState
+            as="h2"
             emoji="🕵️"
             title="Sin confirmadas con precio"
             cta="Confirmá ideas para que aparezcan los totales por categoría."

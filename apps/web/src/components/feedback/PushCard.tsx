@@ -55,22 +55,22 @@ export function PushCard() {
         </p>
         <p className="mt-0.5 text-sm font-medium text-ink-soft">
           {state === 'enabled'
-            ? 'Te llegan avisos de comentarios y propuestas nuevas.'
+            ? 'Todavía no llega nada: el grupo todavía no manda avisos. Cuando empiece, te llegan acá.'
             : state === 'blocked'
               ? 'Bloqueaste las notificaciones en el navegador. Se activan desde los ajustes del sitio.'
-              : 'Comentarios y propuestas nuevas, directo en el celu.'}
+              : 'El grupo todavía no manda avisos. Dejalo activado y no te vas a perder nada cuando empiecen.'}
         </p>
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
         {state === 'enabled' ? (
           <Button variant="ghost" onClick={() => void deactivate()} disabled={busy}>
-            {busy ? 'Apagando...' : 'Apagar'}
+            {busy ? 'Apagando…' : 'Apagar'}
           </Button>
         ) : state === 'pending' ? (
           <>
             <Button onClick={() => void activate()} disabled={busy}>
-              {busy ? 'Activando...' : 'Activar avisos 🔕'}
+              {busy ? 'Activando…' : 'Activar avisos 🔔'}
             </Button>
             <button
               type="button"

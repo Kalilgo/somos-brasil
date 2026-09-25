@@ -10,6 +10,7 @@ import { useTripsStore } from '@/lib/state/trips'
 import { useIdeasStore } from '@/lib/state/ideas'
 import { useItineraryStore } from '@/lib/state/itinerary'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 export function TripLayout() {
   const { tripId } = useParams()
@@ -27,6 +28,8 @@ export function TripLayout() {
   const [notFound, setNotFound] = useState(false)
   const [failed, setFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
+
+  useDocumentTitle(trip && trip.id === tripId ? trip.name : null)
 
   useEffect(() => {
     if (!tripId) return
@@ -56,6 +59,7 @@ export function TripLayout() {
   if (failed) {
     return (
       <EmptyState
+        as="h2"
         emoji="📡"
         title="No pudimos cargar el viaje"
         cta="Puede ser la conexión. Reintentá y seguimos."
@@ -71,6 +75,7 @@ export function TripLayout() {
   if (notFound) {
     return (
       <EmptyState
+        as="h2"
         emoji="🦤"
         title="No encontramos ese viaje"
         cta="Puede que lo hayan borrado o que la URL tenga un error. Volvé a la lista y elegí otro."

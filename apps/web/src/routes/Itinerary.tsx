@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { fireMiniConfetti } from '@/components/feedback/Confetti'
 import { dayLabel, memberPresentDays, memberPresentDayNumbers, formatMemberRange } from '@/lib/utils/tripDates'
+import { formatPrice } from '@/lib/utils/format'
 import { cn } from '@/lib/utils/cn'
 
 export function Itinerary() {
@@ -259,18 +260,21 @@ export function Itinerary() {
 
       {view.days.length === 0 && !confirmedOutside.length ? (
         <EmptyState
+          as="h2"
           emoji="🗓️"
           title="El itinerario está en blanco"
           cta="Confirmá ideas y andá armando los días del viaje."
         />
       ) : view.days.length === 0 ? (
         <EmptyState
+          as="h2"
           emoji="🗓️"
           title="Todavía no agendamos nada"
           cta="Confirmá ideas y agregalas a los días."
         />
       ) : visibleDays.length === 0 ? (
         <EmptyState
+          as="h2"
           emoji="🌴"
           title="No está de viaje esos días"
           cta="Este integrante no tiene planes en los días que pasa en Brasil, o no definió sus fechas todavía."
@@ -318,7 +322,7 @@ export function Itinerary() {
                           {cat && <Badge tone="category">{cat.name}</Badge>}
                           {item.idea?.price != null && (
                             <span className="font-display text-xs font-bold text-verde-dark">
-                              💵 {item.idea.price} {item.idea.currency}
+                              💵 {formatPrice(item.idea.price, item.idea.currency)}
                             </span>
                           )}
                           {item.notes && (

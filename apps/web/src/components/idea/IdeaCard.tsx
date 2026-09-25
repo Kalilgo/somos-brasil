@@ -113,7 +113,7 @@ export function IdeaCard({ idea, members }: { idea: IdeaWithRelations; members?:
             {idea.image_url && (
               <img
                 src={idea.image_url}
-                alt=""
+                alt={`Foto de ${idea.title}`}
                 width={400}
                 height={225}
                 loading="lazy"

@@ -15,7 +15,7 @@ export const DATA_TTL_MS = 45_000
 export const REACTIONS: { reaction: Reaction; label: string }[] = [
   { reaction: '🔥', label: '¡va!' },
   { reaction: '❤️', label: 'me encanta' },
-  { reaction: '😐', label: 'meh...' },
+  { reaction: '😐', label: 'meh…' },
   { reaction: '🙅', label: 'no' },
 ]
 
@@ -39,14 +39,14 @@ export const SCORE_WEIGHTS = {
 } as const
 
 export const LOADING_MESSAGES = [
-  'Ordenando las maletas...',
-  'Consultando al oráculo del viaje...',
-  'Quemando la caipirinha virtual...',
-  'Negociando descuento en el vuelo...',
-  'Sacándole fotos a la playa desde acá...',
-  'Haciendo señas para frenar el bondi...',
-  'Pegándole al pombo con el grupo...',
-  'Buscando el mejor churrasco del barrio...',
+  'Ordenando las maletas…',
+  'Consultando al oráculo del viaje…',
+  'Quemando la caipirinha virtual…',
+  'Negociando descuento en el vuelo…',
+  'Sacándole fotos a la playa desde acá…',
+  'Haciendo señas para frenar el bondi…',
+  'Pegándole al pombo con el grupo…',
+  'Buscando el mejor churrasco del barrio…',
 ]
 
 export const EMPTY_MESSAGES: Record<string, { emoji: string; title: string; cta: string }> = {

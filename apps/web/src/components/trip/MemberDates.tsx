@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/forms'
 import { useAuthStore } from '@/lib/state/auth'
 import { useTripsStore } from '@/lib/state/trips'
+import { toastSuccess } from '@/lib/state/toasts'
 import { cn } from '@/lib/utils/cn'
 import { formatShortDate } from '@/lib/utils/format'
 import type { MemberPlan } from '@/lib/data/types'
@@ -120,6 +121,7 @@ function MemberDatesEditor({ tripId, initial, onClose }: EditorProps) {
     try {
       if (currentUser)
         await saveMemberPlan(tripId, currentUser.id, { arrival_date: a, departure_date: d, location })
+      toastSuccess('Fechas guardadas 📅')
       onClose()
     } catch {
       setFormError('No se pudieron guardar los datos. Probá de nuevo.')
@@ -156,15 +158,21 @@ function MemberDatesEditor({ tripId, initial, onClose }: EditorProps) {
             label="Llegada"
             type="date"
             value={arrival}
+            max={departure || undefined}
             onChange={(e) => setArrival(e.target.value)}
           />
           <Input
             label="Salida"
             type="date"
             value={departure}
+            min={arrival || undefined}
             onChange={(e) => setDeparture(e.target.value)}
           />
         </div>
+        <p className="-mt-2 text-xs text-ink-soft">
+          Las fechas no tienen que caer dentro del viaje: si llegás antes o te vas después, sumá esos
+          días igual.
+        </p>
         <Input
           label="¿Dónde vas a estar?"
           placeholder="Ej: Olinda, Airbnb frente al mar"
