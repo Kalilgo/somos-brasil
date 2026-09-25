@@ -256,15 +256,15 @@ export function UserSelector() {
 
       <footer className="relative pb-[max(1rem,env(safe-area-inset-bottom))]">
         <nav aria-label="Documentación legal" className="mx-auto flex w-full max-w-5xl items-center justify-center gap-4 px-4 text-xs font-semibold text-white/50">
-          <Link to="/terminos" className="transition-colors hover:text-white">
+          <Link prefetch="intent" to="/terminos" className="transition-colors hover:text-white">
             Términos
           </Link>
           <span aria-hidden>·</span>
-          <Link to="/privacidad" className="transition-colors hover:text-white">
+          <Link prefetch="intent" to="/privacidad" className="transition-colors hover:text-white">
             Privacidad
           </Link>
           <span aria-hidden>·</span>
-          <Link to="/cookies" className="transition-colors hover:text-white">
+          <Link prefetch="intent" to="/cookies" className="transition-colors hover:text-white">
             Cookies
           </Link>
         </nav>

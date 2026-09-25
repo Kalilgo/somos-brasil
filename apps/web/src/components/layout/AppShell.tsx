@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { AppHeader } from './AppHeader'
+import { PageTransition } from './PageTransition'
 import { Toaster } from '@/components/feedback/Toaster'
 import { useAuthStore } from '@/lib/state/auth'
 import { useTripsStore } from '@/lib/state/trips'
@@ -31,6 +32,10 @@ export function AppShell() {
     return <Navigate to="/" replace state={{ from }} />
   }
 
+  // '/viajes' o '/viajes/abc': cambia solo al entrar o salir de un viaje, no
+  // entre secciones. Asi el header no parpadea en cada clic de la nav.
+  const areaKey = location.pathname.split('/').slice(0, 3).join('/')
+
   return (
     <div className="flex min-h-dvh flex-col">
       <a
@@ -44,7 +49,9 @@ export function AppShell() {
         id="contenido"
         className="mx-auto w-full max-w-5xl min-w-0 flex-1 scroll-mt-20 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-5 sm:pb-12"
       >
-        <Outlet />
+        <PageTransition transitionKey={areaKey}>
+          <Outlet />
+        </PageTransition>
       </div>
       <Toaster />
       <span className="sr-only">Ruta: {location.pathname}</span>

@@ -28,6 +28,7 @@ export function BottomNav() {
           return (
             <Link
               key={item.value}
+              prefetch="intent"
               to={item.value === 'inicio' ? `/viajes/${tripId}` : `/viajes/${tripId}/${item.value}`}
               aria-current={isActive ? 'page' : undefined}
               className={cn(

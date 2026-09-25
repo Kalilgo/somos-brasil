@@ -12,10 +12,12 @@ export interface TabsProps {
   items: TabItem[]
   value: string
   onChange: (value: string) => void
+  /** Se dispara al hover/focus: sirve para precargar el chunk de la seccion. */
+  onIntent?: (value: string) => void
   className?: string
 }
 
-export function Tabs({ items, value, onChange, className }: TabsProps) {
+export function Tabs({ items, value, onChange, onIntent, className }: TabsProps) {
   const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -59,6 +61,8 @@ export function Tabs({ items, value, onChange, className }: TabsProps) {
               aria-selected={active}
               onClick={() => onChange(item.value)}
               onKeyDown={(e) => onKeyDown(e, index)}
+              onMouseEnter={() => onIntent?.(item.value)}
+              onFocus={() => onIntent?.(item.value)}
               className={cn(
                 'relative flex min-h-11 items-center whitespace-nowrap rounded-full px-4 py-2 font-display text-sm font-semibold outline-none transition-colors',
                 'focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none',

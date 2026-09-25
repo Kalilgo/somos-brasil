@@ -4,26 +4,21 @@ import { Suspense, lazy, type ReactNode } from 'react'
 import { AppShell } from '@/components/layout/AppShell'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { RootLayout } from '@/routes/RootLayout'
+import { loaders } from '@/routes/lazyRoutes'
 
-const UserSelector = lazy(() => import('@/routes/UserSelector').then((m) => ({ default: m.UserSelector })))
-const TripsHome = lazy(() => import('@/routes/TripsHome').then((m) => ({ default: m.TripsHome })))
-const TripLayout = lazy(() => import('@/routes/TripLayout').then((m) => ({ default: m.TripLayout })))
-const TripDashboard = lazy(() => import('@/routes/TripDashboard').then((m) => ({ default: m.TripDashboard })))
-const IdeasFeed = lazy(() => import('@/routes/IdeasFeed').then((m) => ({ default: m.IdeasFeed })))
-const Itinerary = lazy(() => import('@/routes/Itinerary').then((m) => ({ default: m.Itinerary })))
-const TripSummary = lazy(() => import('@/routes/TripSummary').then((m) => ({ default: m.TripSummary })))
-const Ranking = lazy(() => import('@/routes/Ranking').then((m) => ({ default: m.Ranking })))
-const NotFound = lazy(() => import('@/routes/NotFound').then((m) => ({ default: m.NotFound })))
-const LegalLayout = lazy(() =>
-  import('@/routes/legal/LegalLayout').then((m) => ({ default: m.LegalLayout })),
-)
-const TermsPage = lazy(() => import('@/routes/legal/TermsPage').then((m) => ({ default: m.TermsPage })))
-const PrivacyPage = lazy(() =>
-  import('@/routes/legal/PrivacyPage').then((m) => ({ default: m.PrivacyPage })),
-)
-const CookiesPage = lazy(() =>
-  import('@/routes/legal/CookiesPage').then((m) => ({ default: m.CookiesPage })),
-)
+const UserSelector = lazy(() => loaders.userSelector().then((m) => ({ default: m.UserSelector })))
+const TripsHome = lazy(() => loaders.tripsHome().then((m) => ({ default: m.TripsHome })))
+const TripLayout = lazy(() => loaders.tripLayout().then((m) => ({ default: m.TripLayout })))
+const TripDashboard = lazy(() => loaders.dashboard().then((m) => ({ default: m.TripDashboard })))
+const IdeasFeed = lazy(() => loaders.ideas().then((m) => ({ default: m.IdeasFeed })))
+const Itinerary = lazy(() => loaders.itinerary().then((m) => ({ default: m.Itinerary })))
+const TripSummary = lazy(() => loaders.summary().then((m) => ({ default: m.TripSummary })))
+const Ranking = lazy(() => loaders.ranking().then((m) => ({ default: m.Ranking })))
+const NotFound = lazy(() => loaders.notFound().then((m) => ({ default: m.NotFound })))
+const LegalLayout = lazy(() => loaders.legalLayout().then((m) => ({ default: m.LegalLayout })))
+const TermsPage = lazy(() => loaders.terms().then((m) => ({ default: m.TermsPage })))
+const PrivacyPage = lazy(() => loaders.privacy().then((m) => ({ default: m.PrivacyPage })))
+const CookiesPage = lazy(() => loaders.cookies().then((m) => ({ default: m.CookiesPage })))
 
 function load(node: ReactNode): ReactNode {
   return <Suspense fallback={<LoadingState />}>{node}</Suspense>

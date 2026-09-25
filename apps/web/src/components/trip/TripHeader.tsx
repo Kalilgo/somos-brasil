@@ -17,6 +17,7 @@ export function TripHeader({
   return (
     <section className={cn('mb-5', className)}>
       <Link
+        prefetch="intent"
         to="/viajes"
         className="mb-2 inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-sm font-semibold text-ink-soft transition-colors hover:bg-ink/5 hover:text-ink"
       >

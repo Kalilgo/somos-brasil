@@ -1,5 +1,6 @@
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { Tabs, type TabItem } from '@/components/ui/Tabs'
+import { preloadSection } from '@/routes/lazyRoutes'
 import { cn } from '@/lib/utils/cn'
 
 const items: TabItem[] = [
@@ -22,6 +23,7 @@ export function SectionNav({ className }: { className?: string }) {
       items={items}
       value={active}
       onChange={(v) => navigate(v === 'inicio' ? `/viajes/${tripId}` : `/viajes/${tripId}/${v}`)}
+      onIntent={preloadSection}
       className={cn('mx-auto w-full justify-start sm:justify-center', className)}
     />
   )

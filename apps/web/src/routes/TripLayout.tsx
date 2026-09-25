@@ -6,6 +6,7 @@ import { BottomNav } from '@/components/layout/BottomNav'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { SyncBadge } from '@/components/feedback/SyncBadge'
+import { PageTransition } from '@/components/layout/PageTransition'
 import { useTripsStore } from '@/lib/state/trips'
 import { useIdeasStore } from '@/lib/state/ideas'
 import { useItineraryStore } from '@/lib/state/itinerary'
@@ -101,7 +102,9 @@ export function TripLayout() {
             busy={ideasLoading}
           />
           <div className="mt-5">
-            <Outlet />
+            <PageTransition>
+              <Outlet />
+            </PageTransition>
           </div>
           <BottomNav />
         </>

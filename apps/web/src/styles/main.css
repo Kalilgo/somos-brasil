@@ -69,7 +69,9 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
-    scroll-behavior: smooth;
+    /* Sin scroll-behavior global: en una SPA cada reset de scroll se convertia
+       en un viaje animado de abajo a arriba. Los scrolls que si queremos suaves
+       (las tabs) lo piden explicitamente con behavior: 'smooth'. */
     /* Mata el delay de 300ms del double-tap-to-zoom en Android sin romper el scroll. */
     touch-action: manipulation;
   }

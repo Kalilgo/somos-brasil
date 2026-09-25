@@ -16,7 +16,7 @@ export function TripCard({ trip }: { trip: Trip }) {
   })()
 
   return (
-    <Link to={`/viajes/${trip.id}`} className="block outline-none focus-visible:ring-2 focus-visible:ring-coral/70 rounded-3xl">
+    <Link prefetch="intent" to={`/viajes/${trip.id}`} className="block outline-none focus-visible:ring-2 focus-visible:ring-coral/70 rounded-3xl">
       <CardClickableInner>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
