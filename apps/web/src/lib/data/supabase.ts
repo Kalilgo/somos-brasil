@@ -28,6 +28,10 @@ import { activeToken, logoutSession } from './session'
 
 type MemberResult = Record<string, unknown>
 
+// El grupo de personas casi no cambia: cacheamos para no pegarle a /users en
+// cada carga de ideas.
+const USERS_TTL_MS = 5 * 60_000
+
 // Toda escritura pasa por la edge function member-actions: identidad del JWT,
 // validación de negocio y rate limiting viven en el servidor.
 async function callMember(action: string, payload: Record<string, unknown>): Promise<MemberResult> {
@@ -52,14 +56,19 @@ async function callMember(action: string, payload: Record<string, unknown>): Pro
 
 class SupabaseRepo implements DataRepo {
   readonly kind = 'supabase' as const
+  private usersCache: AppUser[] | null = null
+  private usersCacheAt = 0
 
   async listUsers() {
+    if (this.usersCache && Date.now() - this.usersCacheAt < USERS_TTL_MS) return this.usersCache
     const { data, error } = await supabase()
       .from('users')
       .select('*')
       .order('sort_order', { ascending: true })
     if (error) throw error
-    return data as AppUser[]
+    this.usersCache = data as AppUser[]
+    this.usersCacheAt = Date.now()
+    return this.usersCache
   }
 
   async listCategories() {
@@ -149,40 +158,47 @@ class SupabaseRepo implements DataRepo {
   }
 
   async listIdeas(tripId: string) {
-    const ideaRows = await supabase().from('ideas').select('*').eq('trip_id', tripId)
-    const categoryRows = await supabase().from('categories').select('*')
-    const voteRows = await supabase().from('votes').select('*').in('idea_id', await this.ideaIds(tripId))
-    const commentRows = await supabase().from('comments').select('id, idea_id').in('idea_id', await this.ideaIds(tripId))
-    const itinRows = await supabase().from('itinerary_items').select('idea_id').eq('trip_id', tripId)
-    if (ideaRows.error) throw ideaRows.error
+    // Los ids salen de la propia consulta de ideas: antes se pedian dos veces
+    // más y todo era secuencial (6 round-trips por visita a Ideas).
+    const [ideaRes, categoryRes, itinRes] = await Promise.all([
+      supabase().from('ideas').select('*').eq('trip_id', tripId),
+      supabase().from('categories').select('*'),
+      supabase().from('itinerary_items').select('idea_id').eq('trip_id', tripId),
+    ])
+    if (ideaRes.error) throw ideaRes.error
 
-    const users = await this.listUsers()
+    const ideaIds = (ideaRes.data ?? []).map((r) => r.id as string)
+    const [voteRes, commentRes, users] = await Promise.all([
+      ideaIds.length
+        ? supabase().from('votes').select('*').in('idea_id', ideaIds)
+        : Promise.resolve({ data: [] as Vote[], error: null }),
+      ideaIds.length
+        ? supabase().from('comments').select('id, idea_id').in('idea_id', ideaIds)
+        : Promise.resolve({ data: [] as { id: string; idea_id: string }[], error: null }),
+      this.listUsers(),
+    ])
+
     const commentsMap = new Map<string, number>()
-    for (const c of commentRows.data ?? []) {
+    for (const c of commentRes.data ?? []) {
       const ideaId = c.idea_id as string
       commentsMap.set(ideaId, (commentsMap.get(ideaId) ?? 0) + 1)
     }
-    const itineraryIds = new Set((itinRows.data ?? []).map((i) => i.idea_id as string))
-    const categories = (categoryRows.data ?? []) as Category[]
+    const itineraryIds = new Set((itinRes.data ?? []).map((i) => i.idea_id as string))
+    const categories = (categoryRes.data ?? []) as Category[]
 
-    return (ideaRows.data ?? [])
+    return (ideaRes.data ?? [])
       .map((idea) =>
         ensureIdeaRelations(
           idea as Idea,
           new Map(users.map((u) => [u.id, u])),
           new Map(categories.map((c) => [c.id, c])),
-          (voteRows.data ?? []) as Vote[],
+          (voteRes.data ?? []) as Vote[],
           [],
           itineraryIds,
           useAuthStore.getState().currentUser?.id ?? null,
         ),
       )
       .map((rel) => ({ ...rel, comments_count: commentsMap.get(rel.id) ?? 0 }))
-  }
-
-  private async ideaIds(tripId: string): Promise<string[]> {
-    const { data } = await supabase().from('ideas').select('id').eq('trip_id', tripId)
-    return (data ?? []).map((d) => d.id as string)
   }
 
   async createIdea(input: CreateIdeaInput) {
