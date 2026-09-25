@@ -83,7 +83,7 @@ export function ReactionPicker({
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', damping: 14, stiffness: 500 }}
-                  className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-coral text-[10px] font-extrabold text-white shadow-card"
+                  className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-coral text-[11px] font-extrabold text-white shadow-card"
                   aria-hidden
                 >
                   ✓
@@ -114,7 +114,7 @@ export function ReactionPicker({
                   </span>
                 ))}
                 {overflow > 0 && (
-                  <span className="-ml-1 text-[10px] font-bold tabular-nums text-ink-soft">
+                  <span className="-ml-1 text-[11px] font-bold tabular-nums text-ink-soft">
                     +{overflow}
                   </span>
                 )}

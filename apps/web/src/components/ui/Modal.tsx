@@ -105,7 +105,7 @@ export function Modal({ open, onClose, title, emoji, children, footer, size = 'm
                 ✕
               </button>
             </div>
-            <div className="overflow-y-auto overscroll-contain px-5 py-3">{children}</div>
+            <div className="overflow-y-auto overscroll-contain px-5 py-3 pb-[env(safe-area-inset-bottom)]">{children}</div>
             {footer && (
               <div className="border-t border-ink/5 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
                 {footer}

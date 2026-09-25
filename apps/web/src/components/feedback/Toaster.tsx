@@ -31,7 +31,7 @@ function ToastCard({ id, message, emoji, type }: { id: string; message: string; 
       <button
         onClick={() => dismiss(id)}
         aria-label="Cerrar aviso"
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-white/60 hover:bg-white/15 hover:text-white"
+        className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-white/60 transition-colors hover:bg-white/15 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
       >
         ✕
       </button>
@@ -39,16 +39,21 @@ function ToastCard({ id, message, emoji, type }: { id: string; message: string; 
   )
 }
 
+const MAX_VISIBLE = 3
+
 export function Toaster() {
   const toasts = useToastStore((s) => s.toasts)
+  const hasError = toasts.some((t) => t.type === 'error')
 
   return createPortal(
     <div
+      role={hasError ? 'alert' : 'status'}
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-2 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:inset-x-auto sm:bottom-4 sm:right-4 sm:top-auto sm:items-end sm:pb-4"
+      aria-atomic="true"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-2 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] sm:inset-x-auto sm:bottom-4 sm:right-4 sm:top-auto sm:items-end sm:pb-4"
     >
       <AnimatePresence>
-        {toasts.map((t) => (
+        {toasts.slice(-MAX_VISIBLE).map((t) => (
           <ToastCard key={t.id} {...t} />
         ))}
       </AnimatePresence>

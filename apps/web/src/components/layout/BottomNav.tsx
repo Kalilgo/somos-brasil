@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import { useLocation, useParams } from 'react-router'
+import { motion } from 'motion/react'
 import { cn } from '@/lib/utils/cn'
 
 const items = [
@@ -30,17 +31,24 @@ export function BottomNav() {
               to={item.value === 'inicio' ? `/viajes/${tripId}` : `/viajes/${tripId}/${item.value}`}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl px-1 py-1.5 transition-colors',
-                'outline-none focus-visible:ring-2 focus-visible:ring-coral/70',
-                isActive ? 'bg-ink/8 text-ink' : 'text-ink-soft hover:bg-ink/4 active:bg-ink/6',
+                'relative flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-2xl px-1 py-2 outline-none focus-visible:ring-2 focus-visible:ring-coral/70',
+                isActive ? 'text-ink' : 'text-ink-soft hover:text-ink/80 active:text-ink',
               )}
             >
-              <span className="text-xl leading-none" aria-hidden>
+              {isActive && (
+                <motion.span
+                  layoutId="bottom-nav-pill"
+                  transition={{ type: 'spring', damping: 26, stiffness: 340 }}
+                  className="absolute inset-x-1.5 inset-y-0.5 rounded-2xl bg-ink/8"
+                  aria-hidden
+                />
+              )}
+              <span className="relative text-xl leading-none" aria-hidden>
                 {item.emoji}
               </span>
               <span
                 className={cn(
-                  'max-w-full truncate font-display text-xs font-bold tracking-wide',
+                  'relative max-w-full truncate font-display text-[11px] font-bold tracking-wide',
                   isActive ? 'text-ink' : 'text-ink-soft',
                 )}
               >

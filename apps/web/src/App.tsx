@@ -6,6 +6,7 @@ import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { CHUNK_RETRY_KEY } from '@/lib/chunk'
 import { ChunkErrorBoundary } from '@/components/feedback/ChunkErrorBoundary'
 import { UpdateBanner } from '@/components/feedback/UpdateBanner'
+import { ConsentBanner } from '@/components/layout/ConsentBanner'
 
 export default function App() {
   useEffect(() => {
@@ -17,6 +18,7 @@ export default function App() {
       <ChunkErrorBoundary>
         <MotionConfig reducedMotion="user">
           <RouterProvider router={router} />
+          <ConsentBanner />
         </MotionConfig>
       </ChunkErrorBoundary>
       <UpdateBanner />

@@ -1,5 +1,5 @@
 const priceFmts = new Map<string, Intl.NumberFormat>()
-const dateFmt = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' })
+const dateFmt = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' })
 
 export function formatShortDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`)

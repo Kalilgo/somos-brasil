@@ -2,6 +2,7 @@ import type { Currency, IdeaStatus, Reaction } from '@/types/db'
 
 export const STORAGE_KEYS = {
   user: 'somos-brasil-user',
+  consent: 'somos-brasil-consent',
 } as const
 
 export const CURRENCIES: Currency[] = ['USD', 'BRL', 'ARS', 'MXN', 'EUR']

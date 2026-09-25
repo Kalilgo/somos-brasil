@@ -13,6 +13,16 @@ const Itinerary = lazy(() => import('@/routes/Itinerary').then((m) => ({ default
 const TripSummary = lazy(() => import('@/routes/TripSummary').then((m) => ({ default: m.TripSummary })))
 const Ranking = lazy(() => import('@/routes/Ranking').then((m) => ({ default: m.Ranking })))
 const NotFound = lazy(() => import('@/routes/NotFound').then((m) => ({ default: m.NotFound })))
+const LegalLayout = lazy(() =>
+  import('@/routes/legal/LegalLayout').then((m) => ({ default: m.LegalLayout })),
+)
+const TermsPage = lazy(() => import('@/routes/legal/TermsPage').then((m) => ({ default: m.TermsPage })))
+const PrivacyPage = lazy(() =>
+  import('@/routes/legal/PrivacyPage').then((m) => ({ default: m.PrivacyPage })),
+)
+const CookiesPage = lazy(() =>
+  import('@/routes/legal/CookiesPage').then((m) => ({ default: m.CookiesPage })),
+)
 
 function load(node: ReactNode): ReactNode {
   return <Suspense fallback={<LoadingState />}>{node}</Suspense>
@@ -36,6 +46,14 @@ export const router = createBrowserRouter([
         ],
       },
       { path: '*', element: load(<NotFound />) },
+    ],
+  },
+  {
+    element: load(<LegalLayout />),
+    children: [
+      { path: '/terminos', element: load(<TermsPage />) },
+      { path: '/privacidad', element: load(<PrivacyPage />) },
+      { path: '/cookies', element: load(<CookiesPage />) },
     ],
   },
 ])

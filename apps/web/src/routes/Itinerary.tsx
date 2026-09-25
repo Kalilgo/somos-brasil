@@ -288,21 +288,21 @@ export function Itinerary() {
                           <button
                           onClick={() => void swapWithinDay(item, -1)}
                           aria-label="Subir"
-                          className="grid h-10 w-10 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+                          className="grid h-11 w-11 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
                         >
                           ↑
                         </button>
                         <button
                           onClick={() => void swapWithinDay(item, 1)}
                           aria-label="Bajar"
-                          className="grid h-10 w-10 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+                          className="grid h-11 w-11 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
                         >
                           ↓
                         </button>
                         <button
                           onClick={() => void remove(item.id).catch(() => {})}
                           aria-label="Sacar del itinerario"
-                          className="grid h-10 w-10 place-items-center rounded-lg bg-danger/10 text-sm text-danger hover:bg-danger/20 focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:outline-none"
+                          className="grid h-11 w-11 place-items-center rounded-lg bg-danger/10 text-sm text-danger hover:bg-danger/20 focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:outline-none"
                         >
                           ✕
                         </button>

@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { motion, type Variants } from 'motion/react'
 import type { AppUser } from '@/types/db'
 import { repo, isDemoMode } from '@/lib/data'
@@ -91,7 +91,7 @@ export function UserSelector() {
         </p>
       </header>
 
-      <main className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-10">
+      <main className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-10 pb-[max(2rem,env(safe-area-inset-bottom))]">
 <motion.h1
            initial={{ opacity: 0, scale: 0.92 }}
            animate={{ opacity: 1, scale: 1 }}
@@ -169,6 +169,22 @@ export function UserSelector() {
             : 'Elegí tu card. La primera vez en este dispositivo te pide el PIN del grupo para entrar.'}
         </p>
       </main>
+
+      <footer className="relative pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <nav aria-label="Documentación legal" className="mx-auto flex w-full max-w-5xl items-center justify-center gap-4 px-4 text-xs font-semibold text-white/50">
+          <Link to="/terminos" className="transition-colors hover:text-white">
+            Términos
+          </Link>
+          <span aria-hidden>·</span>
+          <Link to="/privacidad" className="transition-colors hover:text-white">
+            Privacidad
+          </Link>
+          <span aria-hidden>·</span>
+          <Link to="/cookies" className="transition-colors hover:text-white">
+            Cookies
+          </Link>
+        </nav>
+      </footer>
 
       <Modal
         open={Boolean(pinUser)}
