@@ -7,6 +7,11 @@ export const STORAGE_KEYS = {
 
 export const CURRENCIES: Currency[] = ['USD', 'BRL', 'ARS', 'MXN', 'EUR']
 
+// Cuánto aguantamos los datos en memoria antes de volver a pedirle todo al
+// servidor. Sin esto la app queda congelada: el grupo se pisa los pies y uno
+// nunca ve lo que hará el otro hasta recargar a mano.
+export const DATA_TTL_MS = 45_000
+
 export const REACTIONS: { reaction: Reaction; label: string }[] = [
   { reaction: '🔥', label: '¡va!' },
   { reaction: '❤️', label: 'me encanta' },

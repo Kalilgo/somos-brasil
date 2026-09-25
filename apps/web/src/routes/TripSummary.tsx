@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card'
 import { Avatar } from '@/components/ui/Avatar'
 import { toastError, toastSuccess } from '@/lib/state/toasts'
 import { useCountUp } from '@/hooks/useCountUp'
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { formatMemberRange } from '@/lib/utils/tripDates'
 import { cn } from '@/lib/utils/cn'
 
@@ -46,6 +47,10 @@ export function TripSummary() {
       alive = false
     }
   }, [tripId, attempt])
+
+  useAutoRefresh(() => {
+    if (tripId) void repo().getTripSummary(tripId).then(setSummary).catch(() => {})
+  }, Boolean(tripId))
 
   const retry = () => {
     setLoading(true)

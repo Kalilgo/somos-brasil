@@ -7,6 +7,7 @@ import { LoadingState } from '@/components/feedback/LoadingState'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { fireCelebration } from '@/components/feedback/Confetti'
 import { useLeaderboardStore } from '@/lib/state/leaderboard'
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { toastSuccess } from '@/lib/state/toasts'
 import type { LeaderboardResult } from '@/lib/data/types'
 import { cn } from '@/lib/utils/cn'
@@ -36,6 +37,10 @@ export function Ranking() {
       }
     })
   }, [tripId, load])
+
+  useAutoRefresh(() => {
+    if (tripId) void load(tripId)
+  }, Boolean(tripId))
 
   if (loading && !result) return <LoadingState />
 

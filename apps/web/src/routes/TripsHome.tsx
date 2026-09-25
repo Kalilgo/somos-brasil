@@ -8,6 +8,7 @@ import { LoadingState } from '@/components/feedback/LoadingState'
 import { PushCard } from '@/components/feedback/PushCard'
 import { useAuthStore } from '@/lib/state/auth'
 import { useTripsStore } from '@/lib/state/trips'
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { pluralize } from '@/lib/utils/format'
 
 export function TripsHome() {
@@ -24,6 +25,10 @@ export function TripsHome() {
       alive = false
     }
   }, [refreshTrips, loadCategories])
+
+  useAutoRefresh(() => {
+    refreshTrips().catch(() => setLoadError(true))
+  })
 
   return (
     <div>

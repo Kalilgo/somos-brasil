@@ -3,6 +3,8 @@ import type { IdeaStatus, IdeaWithRelations, Reaction } from '@/types/db'
 import { repo } from '@/lib/data'
 import type { CreateIdeaInput } from '@/lib/data/types'
 import { useAuthStore } from '@/lib/state/auth'
+import { toastError } from '@/lib/state/toasts'
+import { isStale } from '@/lib/utils/freshness'
 
 export type SortKey = 'recent' | 'price_asc' | 'price_desc' | 'votes'
 
@@ -14,6 +16,7 @@ export interface IdeasFilters {
 
 interface IdeasState {
   loadedTrip: string | null
+  loadedAt: number
   ideas: IdeaWithRelations[]
   loading: boolean
   filters: IdeasFilters
@@ -26,8 +29,13 @@ interface IdeasState {
   bumpCommentsCount: (ideaId: string, delta: number) => void
 }
 
+// Si tres pantallas piden las ideas del mismo viaje a la vez, sale una sola
+// request: sin esto se disparan ráfagas duplicadas al entrar al viaje.
+const inFlight = new Map<string, Promise<void>>()
+
 export const useIdeasStore = create<IdeasState>((set, get) => ({
   loadedTrip: null,
+  loadedAt: 0,
   ideas: [],
   loading: false,
   filters: { category: 'all', status: 'all', sort: 'recent' },
@@ -35,13 +43,29 @@ export const useIdeasStore = create<IdeasState>((set, get) => ({
   setFilter: (patch) => set((s) => ({ filters: { ...s.filters, ...patch } })),
 
   loadIdeas: async (tripId, force = false) => {
-    if (!force && get().loadedTrip === tripId && get().ideas.length) return
-    set({ loading: true, loadedTrip: tripId })
+    const s = get()
+    if (!force && s.loadedTrip === tripId && s.ideas.length && !isStale(s.loadedAt)) return
+    const pending = inFlight.get(tripId)
+    if (pending && !force) return pending
+
+    const run = (async () => {
+      set({ loading: true })
+      try {
+        const ideas = await repo().listIdeas(tripId)
+        set({ ideas, loadedTrip: tripId, loadedAt: Date.now() })
+      } catch (e) {
+        // No conviene romper la pantalla: avisamos y mantenemos lo último que vimos.
+        toastError(e instanceof Error ? e.message : 'No pudimos actualizar las ideas')
+      } finally {
+        set({ loading: false })
+      }
+    })()
+
+    inFlight.set(tripId, run)
     try {
-      const ideas = await repo().listIdeas(tripId)
-      set({ ideas })
+      await run
     } finally {
-      set({ loading: false })
+      inFlight.delete(tripId)
     }
   },
 

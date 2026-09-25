@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { useIdeasStore } from '@/lib/state/ideas'
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { useTripsStore } from '@/lib/state/trips'
 import { pluralize } from '@/lib/utils/format'
 
@@ -23,6 +24,10 @@ export function IdeasFeed() {
   useEffect(() => {
     if (tripId) void loadIdeas(tripId)
   }, [tripId, loadIdeas])
+
+  useAutoRefresh(() => {
+    if (tripId) void loadIdeas(tripId)
+  }, Boolean(tripId))
 
   const filtered = useMemo(() => {
     let list = ideas.filter((i) => i.status !== 'discarded')
