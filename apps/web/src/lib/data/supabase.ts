@@ -37,7 +37,8 @@ const USERS_TTL_MS = 5 * 60_000
 async function callMember(action: string, payload: Record<string, unknown>): Promise<MemberResult> {
   const token = activeToken()
   if (!token) throw new Error('Necesitás entrar con tu PIN para eso.')
-  const { data, error } = await supabase().functions.invoke('member-actions', {
+  const sb = await supabase()
+  const { data, error } = await sb.functions.invoke('member-actions', {
     body: { action, ...payload },
     headers: { Authorization: `Bearer ${token}` },
   })
@@ -61,7 +62,8 @@ class SupabaseRepo implements DataRepo {
 
   async listUsers() {
     if (this.usersCache && Date.now() - this.usersCacheAt < USERS_TTL_MS) return this.usersCache
-    const { data, error } = await supabase()
+    const sb = await supabase()
+    const { data, error } = await sb
       .from('users')
       .select('*')
       .order('sort_order', { ascending: true })
@@ -72,7 +74,8 @@ class SupabaseRepo implements DataRepo {
   }
 
   async listCategories() {
-    const { data, error } = await supabase()
+    const sb = await supabase()
+    const { data, error } = await sb
       .from('categories')
       .select('*')
       .order('sort_order', { ascending: true })
@@ -81,7 +84,8 @@ class SupabaseRepo implements DataRepo {
   }
 
   async listTrips() {
-    const { data, error } = await supabase()
+    const sb = await supabase()
+    const { data, error } = await sb
       .from('trips')
       .select('*')
       .order('created_at', { ascending: false })
@@ -90,7 +94,8 @@ class SupabaseRepo implements DataRepo {
   }
 
   async getTrip(tripId: string) {
-    const { data, error } = await supabase().from('trips').select('*').eq('id', tripId).maybeSingle()
+    const sb = await supabase()
+    const { data, error } = await sb.from('trips').select('*').eq('id', tripId).maybeSingle()
     if (error) throw error
     return (data as Trip | null) ?? null
   }
@@ -124,7 +129,8 @@ class SupabaseRepo implements DataRepo {
   }
 
   async getTripMembers(tripId: string) {
-    const { data, error } = await supabase()
+    const sb = await supabase()
+    const { data, error } = await sb
       .from('trip_members')
       .select('user_id, user:users(*)')
       .eq('trip_id', tripId)
@@ -138,7 +144,8 @@ class SupabaseRepo implements DataRepo {
   }
 
   async listMemberPlans(tripId: string): Promise<MemberPlan[]> {
-    const { data, error } = await supabase()
+    const sb = await supabase()
+    const { data, error } = await sb
       .from('trip_members')
       .select('user_id, arrival_date, departure_date, location')
       .eq('trip_id', tripId)
@@ -160,20 +167,21 @@ class SupabaseRepo implements DataRepo {
   async listIdeas(tripId: string) {
     // Los ids salen de la propia consulta de ideas: antes se pedian dos veces
     // más y todo era secuencial (6 round-trips por visita a Ideas).
+    const sb = await supabase()
     const [ideaRes, categoryRes, itinRes] = await Promise.all([
-      supabase().from('ideas').select('*').eq('trip_id', tripId),
-      supabase().from('categories').select('*'),
-      supabase().from('itinerary_items').select('idea_id').eq('trip_id', tripId),
+      sb.from('ideas').select('*').eq('trip_id', tripId),
+      sb.from('categories').select('*'),
+      sb.from('itinerary_items').select('idea_id').eq('trip_id', tripId),
     ])
     if (ideaRes.error) throw ideaRes.error
 
     const ideaIds = (ideaRes.data ?? []).map((r) => r.id as string)
     const [voteRes, commentRes, users] = await Promise.all([
       ideaIds.length
-        ? supabase().from('votes').select('*').in('idea_id', ideaIds)
+        ? sb.from('votes').select('*').in('idea_id', ideaIds)
         : Promise.resolve({ data: [] as Vote[], error: null }),
       ideaIds.length
-        ? supabase().from('comments').select('id, idea_id').in('idea_id', ideaIds)
+        ? sb.from('comments').select('id, idea_id').in('idea_id', ideaIds)
         : Promise.resolve({ data: [] as { id: string; idea_id: string }[], error: null }),
       this.listUsers(),
     ])
@@ -245,7 +253,8 @@ class SupabaseRepo implements DataRepo {
   }
 
   async listComments(ideaId: string) {
-    const { data, error } = await supabase()
+    const sb = await supabase()
+    const { data, error } = await sb
       .from('comments')
       .select('*, author:users(*)')
       .eq('idea_id', ideaId)
@@ -263,7 +272,8 @@ class SupabaseRepo implements DataRepo {
   }
 
   async listItinerary(tripId: string): Promise<ItineraryView> {
-    const { data, error } = await supabase()
+    const sb = await supabase()
+    const { data, error } = await sb
       .from('itinerary_items')
       .select('*, idea:ideas(*)')
       .eq('trip_id', tripId)
@@ -298,7 +308,8 @@ class SupabaseRepo implements DataRepo {
   }
 
   async getTripSummary(tripId: string) {
-    const { data, error } = await supabase().functions.invoke('calculate-trip-summary', {
+    const sb = await supabase()
+    const { data, error } = await sb.functions.invoke('calculate-trip-summary', {
       body: { trip_id: tripId },
     })
     if (error) throw error
@@ -306,7 +317,8 @@ class SupabaseRepo implements DataRepo {
   }
 
   async getLeaderboard(tripId: string): Promise<LeaderboardResult> {
-    const { data, error } = await supabase().functions.invoke('get-leaderboard', {
+    const sb = await supabase()
+    const { data, error } = await sb.functions.invoke('get-leaderboard', {
       body: { trip_id: tripId },
     })
     if (error) throw error

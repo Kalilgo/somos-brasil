@@ -44,3 +44,13 @@ export function preloadSection(value: string): void {
     warmed.delete(key)
   })
 }
+
+/**
+ * En mobile no hay hover, asi que `preloadSection` no se dispara nunca: el
+ * chunk se pediria recien en el tap, que es justo cuando no lo queres. Al abrir
+ * un viaje bajamos las 5 secciones (~57KB en crudo, ~20KB con gzip) en un
+ * momento idle, para que cualquier tab se sienta instantanea al primer toque.
+ */
+export function preloadAllSections(): void {
+  for (const value of Object.keys(sectionForValue)) preloadSection(value)
+}

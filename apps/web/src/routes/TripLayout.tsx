@@ -12,6 +12,7 @@ import { useIdeasStore } from '@/lib/state/ideas'
 import { useItineraryStore } from '@/lib/state/itinerary'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { preloadAllSections } from '@/routes/lazyRoutes'
 
 export function TripLayout() {
   const { tripId } = useParams()
@@ -51,6 +52,18 @@ export function TripLayout() {
     void loadIdeas(tripId, true)
     void loadItinerary(tripId, true)
   }
+
+  // En desktop el hover de las tabs ya precarga, en mobile no existe hover:
+  // bajamos las secciones en idle al abrir el viaje.
+  useEffect(() => {
+    const run = () => preloadAllSections()
+    if (typeof requestIdleCallback === 'function') {
+      const id = requestIdleCallback(run, { timeout: 3_000 })
+      return () => cancelIdleCallback(id)
+    }
+    const id = window.setTimeout(run, 1_200)
+    return () => window.clearTimeout(id)
+  }, [])
 
   useAutoRefresh(() => {
     if (tripId) void loadMembers(tripId).catch(() => {})

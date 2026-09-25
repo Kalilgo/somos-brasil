@@ -14,7 +14,8 @@ export function tokenExpired(token: string): boolean {
 
 // Pide sesión al backend con el PIN del grupo y guarda el token para el usuario.
 export async function loginWithPin(user: AppUser, pin: string): Promise<void> {
-  const { data, error } = await supabase().functions.invoke('login', {
+  const sb = await supabase()
+  const { data, error } = await sb.functions.invoke('login', {
     body: { user_id: user.id, pin },
   })
   if (error) {
