@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router'
 import { Suspense, lazy, type ReactNode } from 'react'
 import { AppShell } from '@/components/layout/AppShell'
 import { LoadingState } from '@/components/feedback/LoadingState'
+import { RootLayout } from '@/routes/RootLayout'
 
 const UserSelector = lazy(() => import('@/routes/UserSelector').then((m) => ({ default: m.UserSelector })))
 const TripsHome = lazy(() => import('@/routes/TripsHome').then((m) => ({ default: m.TripsHome })))
@@ -29,31 +30,36 @@ function load(node: ReactNode): ReactNode {
 }
 
 export const router = createBrowserRouter([
-  { path: '/', element: load(<UserSelector />) },
   {
-    element: <AppShell />,
+    element: <RootLayout />,
     children: [
-      { path: '/viajes', element: load(<TripsHome />) },
+      { path: '/', element: load(<UserSelector />) },
       {
-        path: '/viajes/:tripId',
-        element: load(<TripLayout />),
+        element: <AppShell />,
         children: [
-          { index: true, element: load(<TripDashboard />) },
-          { path: 'ideias', element: load(<IdeasFeed />) },
-          { path: 'itinerario', element: load(<Itinerary />) },
-          { path: 'resumo', element: load(<TripSummary />) },
-          { path: 'ranking', element: load(<Ranking />) },
+          { path: '/viajes', element: load(<TripsHome />) },
+          {
+            path: '/viajes/:tripId',
+            element: load(<TripLayout />),
+            children: [
+              { index: true, element: load(<TripDashboard />) },
+              { path: 'ideias', element: load(<IdeasFeed />) },
+              { path: 'itinerario', element: load(<Itinerary />) },
+              { path: 'resumo', element: load(<TripSummary />) },
+              { path: 'ranking', element: load(<Ranking />) },
+            ],
+          },
+          { path: '*', element: load(<NotFound />) },
         ],
       },
-      { path: '*', element: load(<NotFound />) },
-    ],
-  },
-  {
-    element: load(<LegalLayout />),
-    children: [
-      { path: '/terminos', element: load(<TermsPage />) },
-      { path: '/privacidad', element: load(<PrivacyPage />) },
-      { path: '/cookies', element: load(<CookiesPage />) },
+      {
+        element: load(<LegalLayout />),
+        children: [
+          { path: '/terminos', element: load(<TermsPage />) },
+          { path: '/privacidad', element: load(<PrivacyPage />) },
+          { path: '/cookies', element: load(<CookiesPage />) },
+        ],
+      },
     ],
   },
 ])
