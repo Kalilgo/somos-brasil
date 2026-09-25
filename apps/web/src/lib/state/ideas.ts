@@ -6,21 +6,13 @@ import { useAuthStore } from '@/lib/state/auth'
 import { toastError } from '@/lib/state/toasts'
 import { isStale } from '@/lib/utils/freshness'
 
-export type SortKey = 'recent' | 'price_asc' | 'price_desc' | 'votes'
-
-export interface IdeasFilters {
-  category: string
-  status: string
-  sort: SortKey
-}
+export type { SortKey, IdeaFilters } from '@/hooks/useIdeaFilters'
 
 interface IdeasState {
   loadedTrip: string | null
   loadedAt: number
   ideas: IdeaWithRelations[]
   loading: boolean
-  filters: IdeasFilters
-  setFilter: (patch: Partial<IdeasFilters>) => void
   loadIdeas: (tripId: string, force?: boolean) => Promise<void>
   addIdea: (input: CreateIdeaInput) => Promise<IdeaWithRelations | null>
   changeStatus: (ideaId: string, status: IdeaStatus) => Promise<void>
@@ -38,9 +30,6 @@ export const useIdeasStore = create<IdeasState>((set, get) => ({
   loadedAt: 0,
   ideas: [],
   loading: false,
-  filters: { category: 'all', status: 'all', sort: 'recent' },
-
-  setFilter: (patch) => set((s) => ({ filters: { ...s.filters, ...patch } })),
 
   loadIdeas: async (tripId, force = false) => {
     const s = get()

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useParams, useSearchParams } from 'react-router'
 import { motion } from 'motion/react'
 import type { ItineraryRow } from '@/lib/data/types'
 import { useItineraryStore } from '@/lib/state/itinerary'
@@ -31,8 +31,25 @@ export function Itinerary() {
   const loadPlans = useTripsStore((s) => s.loadMemberPlans)
   const currentUser = useAuthStore((s) => s.currentUser)
 
-  const [selectedId, setSelectedId] = useState<string>('all')
   const [busyId, setBusyId] = useState<string | null>(null)
+
+  // "Estoy viendo el itinerario de Fede" va en la URL para poder compartirlo.
+  const [params, setParams] = useSearchParams()
+  const selectedId = params.get('integrante') ?? 'all'
+  const setSelectedId = useCallback(
+    (id: string, replace = false) => {
+      setParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          if (id === 'all') next.delete('integrante')
+          else next.set('integrante', id)
+          return next
+        },
+        { replace },
+      )
+    },
+    [setParams],
+  )
 
   useEffect(() => {
     if (tripId) {
@@ -45,11 +62,11 @@ export function Itinerary() {
 
   useEffect(() => {
     if (!plans?.length) return
-    // oxlint-disable-next-line react/set-state-in-effect -- preseleccionar el integrante actual cuando cargan los planes
-    setSelectedId((prev) =>
-      prev === 'all' && currentUser ? (plans.some((p) => p.user_id === currentUser.id) ? currentUser.id : 'all') : prev,
-    )
-  }, [plans, currentUser])
+    if (params.has('integrante') || !currentUser) return
+    if (!plans.some((p) => p.user_id === currentUser.id)) return
+    // oxlint-disable-next-line react/set-state-in-effect -- abrir por defecto en tu propio itinerario
+    setSelectedId(currentUser.id, true)
+  }, [plans, currentUser, params, setSelectedId])
 
   const planById = useMemo(() => new Map((plans ?? []).map((p) => [p.user_id, p])), [plans])
 

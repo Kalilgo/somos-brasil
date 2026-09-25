@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { useIdeasStore } from '@/lib/state/ideas'
+import { useIdeaFilters } from '@/hooks/useIdeaFilters'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { useTripsStore } from '@/lib/state/trips'
 import { pluralize } from '@/lib/utils/format'
@@ -15,7 +16,7 @@ export function IdeasFeed() {
   const { tripId } = useParams()
   const ideas = useIdeasStore((s) => s.ideas)
   const loading = useIdeasStore((s) => s.loading)
-  const filters = useIdeasStore((s) => s.filters)
+  const { filters, isFiltered, reset } = useIdeaFilters()
   const loadIdeas = useIdeasStore((s) => s.loadIdeas)
   const categories = useTripsStore((s) => s.categories)
   const members = useTripsStore((s) => (tripId ? s.membersByTrip[tripId] : undefined))
@@ -64,6 +65,15 @@ export function IdeasFeed() {
           <p className="text-sm font-medium text-ink-soft">
             {pluralize(filtered.length, 'idea', 'ideas')}
             {filters.status !== 'all' && ' · estado filtrado'}
+            {isFiltered && (
+              <button
+                type="button"
+                onClick={reset}
+                className="ml-2 min-h-9 rounded-full px-2 font-bold text-coral underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+              >
+                Limpiar filtros
+              </button>
+            )}
           </p>
         </div>
         <Button onClick={() => setFormOpen(true)} className="shadow-pop">

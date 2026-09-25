@@ -1,4 +1,4 @@
-import { useIdeasStore, type SortKey } from '@/lib/state/ideas'
+import { useIdeaFilters, type SortKey } from '@/hooks/useIdeaFilters'
 import { useTripsStore } from '@/lib/state/trips'
 import { IDEA_STATUSES } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
@@ -39,8 +39,7 @@ function Chip({
 }
 
 export function FilterChips() {
-  const filters = useIdeasStore((s) => s.filters)
-  const setFilter = useIdeasStore((s) => s.setFilter)
+  const { filters, setFilter } = useIdeaFilters()
   const categories = useTripsStore((s) => s.categories)
 
   const statusOptions = [
