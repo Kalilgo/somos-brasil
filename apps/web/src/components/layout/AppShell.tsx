@@ -17,14 +17,18 @@ export function AppShell() {
     void loadCategories().catch(() => {})
   }, [loadCategories])
 
+  // `from` evita perder la pantalla: si se cae la sesión en /viajes/abc, tras el
+  // PIN volvés al mismo viaje y no a la lista.
+  const from = `${location.pathname}${location.search}`
+
   if (!currentUser) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/" replace state={{ from }} />
   }
 
   // En modo real, aunque haya usuario elegido, sin sesión válida volvé a elegir con PIN.
   if (!isDemoMode && !activeToken()) {
     setSessionToken(null)
-    return <Navigate to="/" replace />
+    return <Navigate to="/" replace state={{ from }} />
   }
 
   return (

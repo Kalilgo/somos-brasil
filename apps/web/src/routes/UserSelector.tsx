@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { motion, type Variants } from 'motion/react'
 import type { AppUser } from '@/types/db'
 import { repo, isDemoMode } from '@/lib/data'
 import { useAuthStore } from '@/lib/state/auth'
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { toastError, toastSuccess } from '@/lib/state/toasts'
 import { fireCelebration } from '@/components/feedback/Confetti'
 import { Modal } from '@/components/ui/Modal'
@@ -24,11 +25,14 @@ const profile: Variants = {
 export function UserSelector() {
   const currentUser = useAuthStore((s) => s.currentUser)
   const setCurrentUser = useAuthStore((s) => s.setCurrentUser)
+  const lastUserId = useAuthStore((s) => s.lastUserId)
   const navigate = useNavigate()
+  const location = useLocation()
   const [users, setUsers] = useState<AppUser[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [attempt, setAttempt] = useState(0)
+  const [showAll, setShowAll] = useState(false)
   const [pinUser, setPinUser] = useState<AppUser | null>(null)
   const [pin, setPin] = useState('')
   const [pinBusy, setPinBusy] = useState(false)
@@ -48,17 +52,30 @@ export function UserSelector() {
     }
   }, [attempt])
 
+  useAutoRefresh(() => {
+    repo()
+      .listUsers()
+      .then(setUsers)
+      .catch(() => {})
+  }, true)
+
   const retryLoad = () => {
     setLoadError(null)
     setLoading(true)
     setAttempt((n) => n + 1)
   }
 
+  // Si ya sabemos quién es, "seguí como Ana" es un tap en vez de elegir entre
+  // seis. El selector completo queda a un toque de distancia.
+  const lastUser = users.find((u) => u.id === lastUserId) ?? null
+  const showPicker = showAll || !lastUser
+
   const finish = (user: AppUser) => {
     setCurrentUser(user)
     fireCelebration()
     toastSuccess(`¡Bienvenido/a ${user.name}!`, user.emoji)
-    navigate('/viajes')
+    const back = (location.state as { from?: string } | null)?.from
+    navigate(back ?? '/viajes')
   }
 
   const pick = (user: AppUser) => {
@@ -118,7 +135,7 @@ export function UserSelector() {
            transition={{ delay: 0.1 }}
            className="mt-2 text-center font-display text-base font-semibold text-white/55 drop-shadow-[0_0_10px_rgba(255,201,60,0.3)]"
          >
-           Elegí tu card y empecemos a armar el viaje 💃
+            {lastUser && !showPicker ? 'Retomá donde lo dejaron, en un toque' : 'Elegí tu card y empecemos a armar el viaje 💃'}
          </motion.p>
 
         {loading ? (
@@ -148,12 +165,42 @@ export function UserSelector() {
             </button>
           </div>
         ) : (
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="mt-10 grid w-full max-w-3xl grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6"
-          >
+          <div className="mt-10 flex w-full max-w-3xl flex-col items-center gap-6">
+            {!showPicker && lastUser && (
+              <div className="flex w-full max-w-sm flex-col items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => pick(lastUser)}
+                  className="group flex w-full items-center gap-4 rounded-3xl border border-white/20 bg-white/15 p-4 text-left backdrop-blur-sm transition-transform active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:outline-none"
+                >
+                  <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white/15 text-3xl">
+                    {lastUser.emoji}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-xs font-bold tracking-wide text-white/60 uppercase">
+                      Última vez entraste como
+                    </span>
+                    <span className="block truncate font-display text-xl font-extrabold text-white">
+                      {lastUser.name}
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAll(true)}
+                  className="min-h-11 rounded-full px-4 font-display text-sm font-bold text-white/80 underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:outline-none"
+                >
+                  ¿No sos vos? Ver todos
+                </button>
+              </div>
+            )}
+            {showPicker && (
+              <motion.div
+                variants={container}
+                initial="hidden"
+                animate="show"
+                className="grid w-full max-w-3xl grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6"
+              >
             {users.map((user) => {
               const active = currentUser?.id === user.id
               return (
@@ -192,7 +239,9 @@ export function UserSelector() {
                 </motion.button>
               )
             })}
-          </motion.div>
+              </motion.div>
+            )}
+          </div>
         )}
 
         <p className="mt-10 max-w-sm text-center text-sm font-medium leading-relaxed text-white/45">
