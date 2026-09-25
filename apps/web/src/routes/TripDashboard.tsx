@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { motion } from 'motion/react'
 import { Card } from '@/components/ui/Card'
@@ -14,6 +14,7 @@ import { formatPrice } from '@/lib/utils/format'
 export function TripDashboard() {
   const { tripId } = useParams()
   const navigate = useNavigate()
+  const [movidasOpen, setMovidasOpen] = useState(false)
   const ideas = useIdeasStore((s) => s.ideas)
   const loadingIdeas = useIdeasStore((s) => s.loading)
   const loadIdeas = useIdeasStore((s) => s.loadIdeas)
@@ -106,10 +107,45 @@ export function TripDashboard() {
         </Card>
 
         <Card className="min-w-0 p-5">
-          <h3 className="font-display text-lg font-extrabold text-ink">
-            Últimas movidas del grupo
-          </h3>
-          <ul className="mt-3 flex flex-col gap-2.5">
+          <button
+            type="button"
+            onClick={() => setMovidasOpen((v) => !v)}
+            aria-expanded={movidasOpen}
+            aria-controls="ultimas-movidas-content"
+            className="flex w-full items-center justify-between gap-3 text-left"
+          >
+            <h3 className="font-display text-lg font-extrabold text-ink">
+              Últimas movidas del grupo
+            </h3>
+            <span
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink/6 text-ink-soft transition-colors hover:bg-ink/12"
+              aria-hidden
+            >
+              <motion.svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                animate={{ rotate: movidasOpen ? 180 : 0 }}
+                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <path d="m6 9 6 6 6-6" />
+              </motion.svg>
+            </span>
+          </button>
+
+          <motion.div
+            id="ultimas-movidas-content"
+            initial={false}
+            animate={{ height: movidasOpen ? 'auto' : 0, opacity: movidasOpen ? 1 : 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <ul className="mt-3 flex flex-col gap-2.5">
             {recent.length === 0 ? (
               <p className="text-sm font-medium text-ink-soft">
                 Nada todavía. ¡La primera idea puede ser tuya!
@@ -133,6 +169,7 @@ export function TripDashboard() {
               </li>
             )}
           </ul>
+          </motion.div>
         </Card>
       </div>
 
