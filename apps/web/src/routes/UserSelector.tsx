@@ -27,6 +27,8 @@ export function UserSelector() {
   const navigate = useNavigate()
   const [users, setUsers] = useState<AppUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [attempt, setAttempt] = useState(0)
   const [pinUser, setPinUser] = useState<AppUser | null>(null)
   const [pin, setPin] = useState('')
   const [pinBusy, setPinBusy] = useState(false)
@@ -36,11 +38,21 @@ export function UserSelector() {
     repo()
       .listUsers()
       .then((u) => alive && setUsers(u))
+      .catch((e: unknown) => {
+        if (!alive) return
+        setLoadError(e instanceof Error ? e.message : 'No pudimos cargar a los integrantes')
+      })
       .finally(() => alive && setLoading(false))
     return () => {
       alive = false
     }
-  }, [])
+  }, [attempt])
+
+  const retryLoad = () => {
+    setLoadError(null)
+    setLoading(true)
+    setAttempt((n) => n + 1)
+  }
 
   const finish = (user: AppUser) => {
     setCurrentUser(user)
@@ -114,6 +126,26 @@ export function UserSelector() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="aspect-square animate-pulse rounded-2xl bg-white/10" />
             ))}
+          </div>
+        ) : loadError ? (
+          <div
+            role="alert"
+            className="mt-10 flex w-full max-w-md flex-col items-center gap-3 rounded-3xl border border-white/15 bg-white/10 p-6 text-center backdrop-blur-sm"
+          >
+            <span className="text-4xl" aria-hidden>
+              📡
+            </span>
+            <p className="font-display text-base font-bold text-white">No pudimos cargar al grupo</p>
+            <p className="text-sm font-medium text-white/70">
+              {loadError} Revisá la conexión y volvé a intentarlo.
+            </p>
+            <button
+              type="button"
+              onClick={retryLoad}
+              className="mt-1 min-h-11 rounded-full bg-coral px-5 font-display text-sm font-extrabold text-white transition-transform active:scale-95 focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:outline-none"
+            >
+              Reintentar
+            </button>
           </div>
         ) : (
           <motion.div

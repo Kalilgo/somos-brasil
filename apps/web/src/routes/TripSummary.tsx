@@ -6,7 +6,7 @@ import { LoadingState } from '@/components/feedback/LoadingState'
 import { EmptyState } from '@/components/feedback/EmptyState'
 import { Card } from '@/components/ui/Card'
 import { Avatar } from '@/components/ui/Avatar'
-import { toastSuccess } from '@/lib/state/toasts'
+import { toastError, toastSuccess } from '@/lib/state/toasts'
 import { useCountUp } from '@/hooks/useCountUp'
 import { formatMemberRange } from '@/lib/utils/tripDates'
 import { cn } from '@/lib/utils/cn'
@@ -30,10 +30,13 @@ export function TripSummary() {
   const navigate = useNavigate()
   const [summary, setSummary] = useState<Summary | null>(null)
   const [loading, setLoading] = useState(true)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     let alive = true
     if (!tripId) return
+    // oxlint-disable-next-line react/set-state-in-effect -- mostrar el loader al cambiar de viaje o al reintentar
+    setLoading(true)
     repo()
       .getTripSummary(tripId)
       .then((s) => alive && setSummary(s))
@@ -42,7 +45,12 @@ export function TripSummary() {
     return () => {
       alive = false
     }
-  }, [tripId])
+  }, [tripId, attempt])
+
+  const retry = () => {
+    setLoading(true)
+    setAttempt((n) => n + 1)
+  }
 
   const copySummary = useCallback(() => {
     if (!summary) return
@@ -73,9 +81,10 @@ export function TripSummary() {
       '',
       'Hecho con ❤️ en Somos Brasil',
     ]
-    void navigator.clipboard?.writeText(lines.join('\n')).then(() =>
-      toastSuccess('Resumen copiado, mandalo al grupo 📋', '📤'),
-    )
+    void navigator.clipboard
+      ?.writeText(lines.join('\n'))
+      .then(() => toastSuccess('Resumen copiado, mandalo al grupo 📋', '📤'))
+      .catch(() => toastError('El navegador no dejó copiar. Probá seleccionar el texto a mano.'))
   }, [summary])
 
   if (loading) return <LoadingState />
@@ -85,7 +94,9 @@ export function TripSummary() {
       <EmptyState
         emoji="🧮"
         title="No pudimos calcular el resumen"
-        cta="Confirmá algunas ideas y volvé a intentar."
+        cta="Puede ser un problema de conexión. Reintentá o confirmá algunas ideas con precio."
+        actionLabel="Reintentar"
+        onAction={retry}
       />
     )
   }

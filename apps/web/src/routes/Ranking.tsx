@@ -137,7 +137,9 @@ export function Ranking() {
         ))}
         {rest.length === 0 && (
           <p className="text-center text-sm font-medium text-ink-soft">
-            Los otros 3 no llegaron al podio... todavía 😏
+            {result.ranking.length <= 3
+              ? 'Todo el grupo está en el podio. Tremendo 😎'
+              : `Los ${result.ranking.length - 3} de atrás todavía no llegan al podio… todavía 😏`}
           </p>
         )}
       </div>

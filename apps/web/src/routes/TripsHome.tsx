@@ -14,10 +14,15 @@ export function TripsHome() {
   const currentUser = useAuthStore((s) => s.currentUser)
   const { trips, loadingTrips, refreshTrips, loadCategories } = useTripsStore()
   const [creating, setCreating] = useState(false)
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
-    void refreshTrips()
+    let alive = true
+    refreshTrips().catch(() => alive && setLoadError(true))
     void loadCategories().catch(() => {})
+    return () => {
+      alive = false
+    }
   }, [refreshTrips, loadCategories])
 
   return (
@@ -38,6 +43,17 @@ export function TripsHome() {
 
       {loadingTrips ? (
         <LoadingState />
+      ) : loadError ? (
+        <EmptyState
+          emoji="📡"
+          title="No pudimos cargar los viajes"
+          cta="Puede ser la conexión o que la app esté caída un ratito."
+          actionLabel="Reintentar"
+          onAction={() => {
+            setLoadError(false)
+            void refreshTrips().catch(() => setLoadError(true))
+          }}
+        />
       ) : trips.length === 0 ? (
         <EmptyState
           emoji="🏝️"

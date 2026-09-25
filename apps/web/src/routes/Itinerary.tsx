@@ -32,6 +32,7 @@ export function Itinerary() {
   const currentUser = useAuthStore((s) => s.currentUser)
 
   const [selectedId, setSelectedId] = useState<string>('all')
+  const [busyId, setBusyId] = useState<string | null>(null)
 
   useEffect(() => {
     if (tripId) {
@@ -76,27 +77,53 @@ export function Itinerary() {
   )
 
   const moveToDay = async (item: ItineraryRow, targetDay: number) => {
-    if (!tripId) return
+    if (!tripId || busyId) return
+    setBusyId(item.id)
     const siblings = view.days.find((d) => d.day_number === targetDay)?.items.length ?? 0
     try {
       await move(item.id, targetDay, siblings + 1)
       toastSuccess(`Movida al día ${targetDay} 📅`)
     } catch (e) {
       toastError(e instanceof Error ? e.message : 'No se pudo mover')
+    } finally {
+      setBusyId(null)
     }
   }
 
   const swapWithinDay = async (item: ItineraryRow, direction: -1 | 1) => {
+    if (busyId) return
     const day = view.days.find((d) => d.day_number === item.day_number)
     if (!day) return
     const idx = day.items.findIndex((i) => i.id === item.id)
     const other = day.items[idx + direction]
     if (!other) return
+    setBusyId(item.id)
     try {
       await move(item.id, item.day_number, other.sort_order)
-      await move(other.id, other.day_number, item.sort_order)
+      try {
+        await move(other.id, other.day_number, item.sort_order)
+      } catch (e) {
+        // El segundo movimiento falló: devolvemos el primero para no dejar el día desordenado.
+        await move(item.id, item.day_number, item.sort_order).catch(() => {})
+        throw e
+      }
     } catch (e) {
       toastError(e instanceof Error ? e.message : 'No se pudo reordenar')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const removeItem = async (item: ItineraryRow) => {
+    if (busyId) return
+    setBusyId(item.id)
+    try {
+      await remove(item.id)
+      toastSuccess(`"${item.idea?.title ?? 'Idea'}" fuera del itinerario`, '🗓️')
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : 'No se pudo sacar del itinerario')
+    } finally {
+      setBusyId(null)
     }
   }
 
@@ -286,35 +313,39 @@ export function Itinerary() {
                       <div className="flex shrink-0 flex-col items-end gap-1.5">
                         <div className="flex gap-1">
                           <button
-                          onClick={() => void swapWithinDay(item, -1)}
-                          aria-label="Subir"
-                          className="grid h-11 w-11 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+                            onClick={() => void swapWithinDay(item, -1)}
+                            disabled={busyId === item.id}
+                            aria-label={`Subir ${item.idea?.title ?? 'la idea'}`}
+                            className="grid h-11 w-11 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+                          >
+                            ↑
+                          </button>
+                          <button
+                            onClick={() => void swapWithinDay(item, 1)}
+                            disabled={busyId === item.id}
+                            aria-label={`Bajar ${item.idea?.title ?? 'la idea'}`}
+                            className="grid h-11 w-11 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
+                          >
+                            ↓
+                          </button>
+                          <button
+                            onClick={() => void removeItem(item)}
+                            disabled={busyId === item.id}
+                            aria-label={`Sacar ${item.idea?.title ?? 'la idea'} del itinerario`}
+                            className="grid h-11 w-11 place-items-center rounded-lg bg-danger/10 text-sm text-danger hover:bg-danger/20 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:outline-none"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <select
+                          aria-label={`Mover ${item.idea?.title ?? ''} a otro día`}
+                          name="move-day"
+                          autoComplete="off"
+                          disabled={busyId === item.id}
+                          value={item.day_number}
+                          onChange={(e) => void moveToDay(item, Number(e.target.value))}
+                          className="cursor-pointer rounded-lg border border-ink/10 bg-white px-2 py-1.5 text-sm font-bold text-ink-soft outline-none focus-visible:ring-2 focus-visible:ring-coral/70 focus:border-coral disabled:opacity-40"
                         >
-                          ↑
-                        </button>
-                        <button
-                          onClick={() => void swapWithinDay(item, 1)}
-                          aria-label="Bajar"
-                          className="grid h-11 w-11 place-items-center rounded-lg bg-ink/5 text-sm text-ink-soft hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-coral/70 focus-visible:outline-none"
-                        >
-                          ↓
-                        </button>
-                        <button
-                          onClick={() => void remove(item.id).catch(() => {})}
-                          aria-label="Sacar del itinerario"
-                          className="grid h-11 w-11 place-items-center rounded-lg bg-danger/10 text-sm text-danger hover:bg-danger/20 focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:outline-none"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                      <select
-                        aria-label={`Mover ${item.idea?.title ?? ''} a otro día`}
-                        name="move-day"
-                        autoComplete="off"
-                        value={item.day_number}
-                        onChange={(e) => void moveToDay(item, Number(e.target.value))}
-                        className="cursor-pointer rounded-lg border border-ink/10 bg-white px-2 py-1.5 text-sm font-bold text-ink-soft outline-none focus-visible:ring-2 focus-visible:ring-coral/70 focus:border-coral"
-                      >
                         {view.days.map((d) => (
                           <option key={d.day_number} value={d.day_number}>
                             Día {d.day_number}
