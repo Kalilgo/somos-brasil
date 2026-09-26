@@ -16,6 +16,7 @@
     "db:studio": "supabase studio",
     "env:local": "node scripts/env-local.mjs",
     "fn:local": "supabase functions serve --env-file supabase/functions/.env",
-    "fn:deploy": "supabase functions deploy member-actions && supabase functions deploy login && supabase functions deploy get-leaderboard"
+    "doctor": "node scripts/doctor.mjs",
+    "deploy": "node scripts/deploy.mjs"
   }
 }

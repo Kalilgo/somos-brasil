@@ -151,8 +151,8 @@ introspección devuelve el mapa completo del schema.
 - [ ] Dashboard: rate limits + CORS + desactivar Auth/Storage/GraphQL.
 - [ ] Setear `GROUP_PIN` y `JWT_SIGNING_SECRET` (ver arriba).
 - [ ] Cambiar el PIN y avisar al grupo cómo entrar (elegir card → escribir PIN).
-- [ ] Aplicar las migraciones `0015_endurecimiento.sql` y `0016_superficie_http.sql`:
-      `supabase db push` (o pegarlas en el SQL Editor del dashboard).
+- [ ] Aplicar las migraciones `0015_endurecimiento.sql` y `0016_superficie_http.sql` a
+      PRODUCCION: `npm run deploy -- db` (o pegarlas en el SQL Editor del dashboard).
 
 ## Headers HTTP (vercel.json)
 

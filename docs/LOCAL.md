@@ -57,7 +57,8 @@ Dashboard del stack local: <http://127.0.0.1:54323>
 | `npm run db:studio` | abre el SQL editor del stack local |
 | `npm run env:local` | regenera `apps/web/.env.development` desde `supabase status` |
 | `npm run fn:local` | sirve las edge functions con los secretos de desarrollo |
-| `npm run fn:deploy` | **sube** las functions a producción |
+| `npm run doctor` | revisa las 9 piezas del flujo y dice qué falta |
+| `npm run deploy` | **sube** migraciones y functions a producción, pidiendo confirmación |
 
 ## Dónde vive cada variable
 
@@ -78,6 +79,44 @@ no un archivo del repo.
 
 **Nunca copies los valores de producción a `apps/web/.env`**: ese archivo lo leen los dos
 modos, y es exactamente la trampa de la que veníamos. Para desarrollo usá `npm run env:local`.
+
+## Deploy
+
+El proyecto Supabase está **desvinculado** (`supabase unlink`). Por eso `supabase db push`
+a secas falla en vez de subir migraciones a la base real sin querer — que es lo que
+queremos.
+
+La única vía de vuelta es `npm run deploy`, que vina el proyecto a propósito y pide que
+escribas el nombre del proyecto antes de tocar nada:
+
+```bash
+npm run deploy          # migraciones + edge functions
+npm run deploy -- db    # solo migraciones
+```
+
+Un comando que modifica datos reales de tu grupo tiene que dolar un segundo si lo
+corres por accidente.
+
+## `npm run doctor`
+
+Si algo falla y no sabés qué, corré esto primero. Revisa las nueve piezas del flujo y te
+dice qué falta y con qué comando se arregla:
+
+```
+✓ Docker corriendo
+✓ Stack de Supabase local arriba
+✓ Proyecto desvinculado de produccion
+✓ .env.development apunta a la base local
+✓ No hay un .env con VITE_SUPABASE_URL
+✓ Secretos de las edge functions
+✓ API local responde
+✓ Edge functions servidas
+✓ Migraciones aplicadas
+```
+
+Existe porque todas las formas de estar roto se ven igual desde la app: un toast que
+dice "no se pudo completar", un error de red, un 401. No se distingue "no tenés Docker"
+de "te falta correr env:local" de "la tabla no está migrada".
 
 ## Datos de la base local
 
