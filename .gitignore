@@ -10,6 +10,13 @@ dist-ssr/
 .env
 .env.*
 !.env.example
+!.env.*.example
+# Generado por `npm run env:local` (claves del stack local, pero no hay por que
+# versionarlas: se regeneran con una linea).
+apps/web/.env.development
+# Secretos de las edge functions servidas localmente. Los de produccion van con
+# `supabase secrets set`, jamas en un archivo del repo.
+supabase/functions/.env
 
 # logs
 logs/

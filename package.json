@@ -9,6 +9,13 @@
     "dev": "npm run dev -w @somos-brasil/web",
     "build": "npm run build -w @somos-brasil/web",
     "lint": "npm run lint -w @somos-brasil/web",
-    "typecheck": "npm run typecheck -w @somos-brasil/web"
+    "typecheck": "npm run typecheck -w @somos-brasil/web",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:studio": "supabase studio",
+    "env:local": "node scripts/env-local.mjs",
+    "fn:local": "supabase functions serve --env-file supabase/functions/.env",
+    "fn:deploy": "supabase functions deploy member-actions && supabase functions deploy login && supabase functions deploy get-leaderboard"
   }
 }

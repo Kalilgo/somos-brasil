@@ -1,9 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { supabaseConfigured, supabaseUrl as url, supabaseAnonKey as anonKey } from './env'
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
-
-export const supabaseConfigured = Boolean(url && anonKey)
+export { supabaseConfigured }
 
 let cached: Promise<SupabaseClient> | null = null
 
@@ -13,6 +11,10 @@ let cached: Promise<SupabaseClient> | null = null
  * modulepreload del index.html, con la pantalla en blanco hasta que los 214KB
  * de critical path bajaban. Asi el shell pinta al toque y Supabase llega en
  * paralelo, parado por la primera query.
+ *
+ * Que la URL venga de `env.ts` y no de `import.meta.env` directo es a proposito:
+ * ese modulo valida que no estemos pegados a produccion sin querer, y para que la
+ * validacion corra siempre, incluso en el camino que no termina creando cliente.
  *
  * El `import type` de arriba no cuesta nada: los type imports se borran al
  * compilar.

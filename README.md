@@ -119,5 +119,7 @@ npm run dev
 
 ## Documentación de diseño
 
+- `docs/LOCAL.md` — desarrollo local: base de datos en Docker, los tres ambientes y por qué `npm run dev` no puede tocar producción.
+- `docs/DEFENSA.md` — qué está protegido, cómo, y lo que hay que configurar a mano en el dashboard.
 - `docs/plan.md` — plan completo, datamodel (§2), RLS (§3), edge functions (§7) y decisiones (D1-D5, Ñ1-Ñ2).
 - `docs/decisions.md` — ADRs de las decisiones tomadas.

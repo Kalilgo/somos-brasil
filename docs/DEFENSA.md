@@ -103,6 +103,12 @@ reintentar.
 - [ ] Cachear summary/leaderboard con TTL.
 - [ ] Revisar logs + alerts periódicamente.
 
+## Antes de probar nada: estás en local
+
+`npm run dev` no puede escribir en producción: la app se niega a arrancar si la URL no es local, y sin
+configuración cae en modo demo. El flujo está en [LOCAL.md](LOCAL.md). Esto importa para todo lo de
+abajo: una prueba de rate limiting o un `delete_idea` de prueba se hacen contra la base local.
+
 ## URLs: qué se valida y por qué
 
 Todo lo que viene de la URL es entrada de usuario, igual que un POST. Se valida en el
