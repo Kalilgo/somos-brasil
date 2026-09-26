@@ -13,9 +13,15 @@ import { useItineraryStore } from '@/lib/state/itinerary'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { preloadAllSections } from '@/routes/lazyRoutes'
+import { isUuid } from '@/lib/utils/validate'
 
 export function TripLayout() {
-  const { tripId } = useParams()
+  const params = useParams()
+  // El tripId de la URL se valida acá, una sola vez, y es el único lugar por donde
+  // pasa: todas las secciones cuelgan de este layout. Antes el valor crudo iba
+  // derecho a las queries, y un id que no es UUID (un link cortado, una typo, un
+  // escaneo de bots) terminaba en un error de Postgres en vez de un 404.
+  const tripId = isUuid(params.tripId) ? params.tripId : null
   const navigate = useNavigate()
   const trip = useTripsStore((s) => s.currentTrip)
   const members = useTripsStore((s) => (tripId ? s.membersByTrip[tripId] : undefined))
@@ -86,7 +92,10 @@ export function TripLayout() {
     )
   }
 
-  if (notFound) {
+  // Un tripId que no es UUID nunca se consulta (el efecto de carga sale temprano con
+  // tripId === null), asi que se resuelve acá como "no existe" en vez de dejar el
+  // loading girando para siempre.
+  if (notFound || !tripId) {
     return (
       <EmptyState
         as="h2"

@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 import { IDEA_STATUSES } from '@/lib/utils/constants'
+import { asUuid } from '@/lib/utils/validate'
 
 export type SortKey = 'recent' | 'price_asc' | 'price_desc' | 'votes'
 
@@ -21,7 +22,10 @@ function read(p: URLSearchParams): IdeaFilters {
   const sort = p.get(SORT_KEY)
   const status = p.get(STATUS_KEY)
   return {
-    category: p.get(CATEGORY_KEY) ?? 'all',
+    // categoria es un id de categoria, o sea un UUID. No hay allowlist posible porque
+    // las categorias se crean desde la app, pero si el valor no parece un id se cae a
+    // 'all': asi un link manipulation con ?categoria=<cualquier cosa> no rompe nada.
+    category: asUuid(p.get(CATEGORY_KEY)) ?? 'all',
     status: status && STATUSES.includes(status) ? status : 'all',
     sort: SORTS.includes(sort as SortKey) ? (sort as SortKey) : 'recent',
   }

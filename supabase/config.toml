@@ -6,7 +6,11 @@ project_id = "somos-brasil"
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "graphql_public"]
+# Solo "public". La app no usa GraphQL: dejarlo exposed suma una superficie HTTP
+# completa (con introspeccion, que devuelve el mapa del schema) sin ningún uso.
+# La migracion 0016 revoca tambien USAGE sobre graphql_public, asi que el permiso
+# real esta cerrado por SQL y no solo por esta config.
+schemas = ["public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 

@@ -15,6 +15,7 @@ import { fireMiniConfetti } from '@/components/feedback/Confetti'
 import { dayLabel, memberPresentDays, memberPresentDayNumbers, formatMemberRange } from '@/lib/utils/tripDates'
 import { formatPrice } from '@/lib/utils/format'
 import { cn } from '@/lib/utils/cn'
+import { isUuid } from '@/lib/utils/validate'
 
 export function Itinerary() {
   const { tripId } = useParams()
@@ -36,7 +37,9 @@ export function Itinerary() {
 
   // "Estoy viendo el itinerario de Fede" va en la URL para poder compartirlo.
   const [params, setParams] = useSearchParams()
-  const selectedId = params.get('integrante') ?? 'all'
+  // Un user id llega a la URL, asi que se valida como lo que es: un UUID o 'all'.
+  const rawSelected = params.get('integrante')
+  const selectedId = isUuid(rawSelected) ? rawSelected : 'all'
   const setSelectedId = useCallback(
     (id: string, replace = false) => {
       setParams(

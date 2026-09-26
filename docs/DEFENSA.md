@@ -1,7 +1,7 @@
 # Sistema de defensa (anti-bots / anti-abuso / anti-vandalismo)
 
 Protección por capas para el proyecto Supabase. Todo lo que acá se describe ya está
-implementado en el código (migraciones 0012/0013/**0015**, edge functions `login` y
+implementado en el código (migraciones 0012/0013/**0015/0016**, edge functions `login` y
 `member-actions`, `vercel.json`) o hay que activarlo a mano desde el dashboard de
 Supabase (Fase 0).
 
@@ -103,13 +103,50 @@ reintentar.
 - [ ] Cachear summary/leaderboard con TTL.
 - [ ] Revisar logs + alerts periódicamente.
 
+## URLs: qué se valida y por qué
+
+Todo lo que viene de la URL es entrada de usuario, igual que un POST. Se valida en el
+borde de la app, una sola vez, y no repetido en cada componente.
+
+**Router** — `tripId` se valida como UUID en `TripLayout`, que es el layout padre de
+todas las secciones: es el único lugar por donde pasa, así que un link con un id
+inválido (cortado, con typo, de un escaneo de bots) muestra "no encontramos ese viaje"
+sin disparar ninguna query. `useTripParams` hace lo mismo para los que lo consumen
+desde un modal. Un id que no es UUID contra una columna `uuid` terminaba en un error de
+Postgres en vez de un 404.
+
+**Query params** — `estado` y `orden` ya tenían allowlist. `categoria` (un id) ahora se
+valida como UUID y `integrante` (un user id) también, con fallback a `all`.
+
+**No hay open redirect**: `navigate()` solo recibe rutas internas, y el único valor
+dinámico (`location.state.from` en `UserSelector`) nunca lo setea nadie, así que siempre
+cae en `/viajes`.
+
+## Superficie HTTP de la base
+
+Con la anon key se pueden golpear seis endpoints. Dos quedaron cerrados por SQL
+(migración 0016, que revoca USAGE sobre el schema, así que siguen cerrados aunque
+alguien vuelva a activar la exposición por error):
+
+| Endpoint | Estado |
+| --- | --- |
+| `/rest/v1/<tabla>` | RLS solo lectura + grants `SELECT` (0015) |
+| `/rest/v1/rpc/<fn>` | fuera del alcance de `anon` (0015) |
+| `/graphql/v1` | **cerrado** (0016) + ya no está en `schemas` de `config.toml` |
+| `/storage/v1` | **cerrado** por SQL (0016); desactivar en el dashboard |
+| `/auth/v1` | sin signup en el dashboard (Fase 0) |
+| `/functions/v1/*` | públicas por diseño; validan JWT + rate limit |
+
+GraphQL merecía atención aparte: además de ser otro camino de lectura, la
+introspección devuelve el mapa completo del schema.
+
 ## Fase 0/1 — Lo que hay que hacer a mano
 
 - [ ] Dashboard: rate limits + CORS + desactivar Auth/Storage/GraphQL.
 - [ ] Setear `GROUP_PIN` y `JWT_SIGNING_SECRET` (ver arriba).
 - [ ] Cambiar el PIN y avisar al grupo cómo entrar (elegir card → escribir PIN).
-- [ ] Aplicar la migración `0015_endurecimiento.sql`:
-      `supabase db push` (o pegarla en el SQL Editor del dashboard).
+- [ ] Aplicar las migraciones `0015_endurecimiento.sql` y `0016_superficie_http.sql`:
+      `supabase db push` (o pegarlas en el SQL Editor del dashboard).
 
 ## Headers HTTP (vercel.json)
 
