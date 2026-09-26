@@ -15,6 +15,15 @@ import type { MemberPlan } from './types'
 import { SCORE_WEIGHTS } from '@/lib/utils/constants'
 import { memberPresentDays } from '@/lib/utils/tripDates'
 
+/**
+ * Los cuatro contadores en cero. Se exporta porque una idea recien creada entra al
+ * store antes de que existan sus votos, y ese momento tiene que ser un objeto
+ * completo: si `vote_counts` falta, `counts['🔥']` tira la app abajo.
+ */
+export function emptyVoteCounts(): IdeaWithRelations['vote_counts'] {
+  return { '🔥': 0, '❤️': 0, '😐': 0, '🙅': 0 }
+}
+
 export function computeSummary(
   ideas: Idea[],
   categories: Category[],
@@ -267,8 +276,13 @@ export function ensureIdeaRelations(
   myUserId?: string | null,
 ): IdeaWithRelations {
   const ideaVotes = votes.filter((v) => v.idea_id === idea.id)
-  const voteCounts: IdeaWithRelations['vote_counts'] = { '🔥': 0, '❤️': 0, '😐': 0, '🙅': 0 }
-  for (const v of ideaVotes) voteCounts[v.reaction] += 1
+  const voteCounts = emptyVoteCounts()
+  // `if` y no `+=`: si alguna vez aparece una reacción que no está en REACTIONS
+  // (la base la tiene como texto libre), `undefined + 1` deja NaN en el contador
+  // y la tarjeta muestra "NaN" sin avisar.
+  for (const v of ideaVotes) {
+    if (v.reaction in voteCounts) voteCounts[v.reaction] += 1
+  }
   const myVote = myUserId ? ideaVotes.find((v) => v.user_id === myUserId)?.reaction ?? null : null
   return {
     ...idea,

@@ -31,6 +31,26 @@ export const IDEA_STATUSES: Record<
 
 export const IDEA_STATUS_FLOW: IdeaStatus[] = ['proposal', 'discussing', 'confirmed', 'discarded']
 
+type IdeaStatusInfo = (typeof IDEA_STATUSES)[IdeaStatus]
+
+const UNKNOWN_STATUS: IdeaStatusInfo = {
+  label: 'Sin estado',
+  emoji: '❔',
+  chip: 'bg-ink/10 text-ink-soft',
+  dot: 'bg-ink/30',
+}
+
+/**
+ * Los estados salen de la base, donde la columna es texto. El tipo `IdeaStatus` es
+ * una promesa, no un garantia: si mañana se renombra un estado y quedan ideas con
+ * el valor viejo, `IDEA_STATUSES[status].label` revienta la app con "Cannot read
+ * properties of undefined". Con esto, un estado desconocido se ve como "Sin
+ * estado" y el feed sigue.
+ */
+export function ideaStatusInfo(status: string | null | undefined): IdeaStatusInfo {
+  return (IDEA_STATUSES as Record<string, IdeaStatusInfo | undefined>)[status ?? ''] ?? UNKNOWN_STATUS
+}
+
 export const SCORE_WEIGHTS = {
   ideas: 3,
   votes: 1,

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { IdeaStatus, IdeaWithRelations, Reaction } from '@/types/db'
 import { repo } from '@/lib/data'
 import type { CreateIdeaInput } from '@/lib/data/types'
+import { emptyVoteCounts } from '@/lib/data/logic'
 import { useAuthStore } from '@/lib/state/auth'
 import { toastError } from '@/lib/state/toasts'
 import { isStale } from '@/lib/utils/freshness'
@@ -59,10 +60,29 @@ export const useIdeasStore = create<IdeasState>((set, get) => ({
   },
 
   addIdea: async (input) => {
-    const idea = await repo().createIdea(input)
-    set((s) => ({ ideas: [idea as IdeaWithRelations, ...s.ideas] }))
+    const created = await repo().createIdea(input)
+    if (!created) return null
+    // `createIdea` devuelve la fila cruda de la base: no trae `vote_counts`,
+    // `category`, `proposer` ni los contadores. El store guarda `IdeaWithRelations`,
+    // y antes se la mentia con un `as IdeaWithRelations`: la idea entraba al feed
+    // a medio hidratar y `counts['🔥']` reventaba la app en el primer render. Era
+    // este el error al subir una idea.
+    //
+    // Se arma el esqueleto completo y arriba se pisa con la version hidratada, asi
+    // la tarjeta paints de una y no hay un frame sin datos.
+    const skeleton: IdeaWithRelations = {
+      ...created,
+      category: null,
+      proposer: null,
+      votes: [],
+      vote_counts: emptyVoteCounts(),
+      comments_count: 0,
+      my_vote: null,
+      in_itinerary: false,
+    }
+    set((s) => ({ ideas: [skeleton, ...s.ideas] }))
     const list = await repo().listIdeas(input.trip_id)
-    const full = list.find((i) => i.id === idea.id) ?? null
+    const full = list.find((i) => i.id === created.id) ?? null
     if (full) set((s) => ({ ideas: s.ideas.map((i) => (i.id === full.id ? full : i)) }))
     return full
   },
@@ -95,7 +115,10 @@ export const useIdeasStore = create<IdeasState>((set, get) => ({
     if (!idea || !userId) return
 
     const prevVote = idea.my_vote
-    const prevCounts = { ...idea.vote_counts }
+    // Se parte de los cuatro contadores en cero en vez de copiar los que vengan: si
+    // `vote_counts` viniera incompleto, `{...undefined}` es `{}` y el `+= 1`
+    // siguiente deja NaN, que se ve en pantalla como "NaN" en la tarjeta.
+    const prevCounts = { ...emptyVoteCounts(), ...idea.vote_counts }
     const sameAlready = prevVote === reaction
     const nextVote = sameAlready ? null : reaction
 

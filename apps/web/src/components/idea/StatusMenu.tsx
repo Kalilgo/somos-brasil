@@ -1,7 +1,7 @@
 import type { IdeaStatus } from '@/types/db'
 import { Badge } from '@/components/ui/Badge'
 import { DropdownMenu, MenuItem } from '@/components/ui/DropdownMenu'
-import { IDEA_STATUSES } from '@/lib/utils/constants'
+import { IDEA_STATUSES, ideaStatusInfo } from '@/lib/utils/constants'
 
 export function StatusMenu({
   status,
@@ -10,7 +10,7 @@ export function StatusMenu({
   status: IdeaStatus
   onSelect: (status: IdeaStatus) => void
 }) {
-  const current = IDEA_STATUSES[status]
+  const current = ideaStatusInfo(status)
   return (
     <DropdownMenu
       ariaLabel="Cambiar estado de la idea"

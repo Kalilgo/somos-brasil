@@ -15,7 +15,7 @@ import { useAuthStore } from '@/lib/state/auth'
 import { useTripsStore } from '@/lib/state/trips'
 import { toastError, toastSuccess } from '@/lib/state/toasts'
 import { priceLabel, timeAgo } from '@/lib/utils/format'
-import { IDEA_STATUSES, REACTIONS } from '@/lib/utils/constants'
+import { REACTIONS, ideaStatusInfo } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
 
 export function IdeaCard({ idea, members }: { idea: IdeaWithRelations; members?: AppUser[] }) {
@@ -37,7 +37,7 @@ export function IdeaCard({ idea, members }: { idea: IdeaWithRelations; members?:
   const [addToItineraryOpen, setAddToItineraryOpen] = useState(false)
 
   const category = idea.category
-  const statusInfo = IDEA_STATUSES[idea.status]
+  const statusInfo = ideaStatusInfo(idea.status)
 
   const membersById = new Map((members ?? []).map((u) => [u.id, u]))
   const reactors = (Object.fromEntries(
@@ -175,7 +175,7 @@ export function IdeaCard({ idea, members }: { idea: IdeaWithRelations; members?:
                   commentsOpen ? 'bg-ink text-white' : 'bg-ink/10 text-ink-soft hover:bg-ink/20',
                 )}
               >
-                💬 {idea.comments_count > 0 ? idea.comments_count : 'Comentar'}
+                💬 {(idea.comments_count ?? 0) > 0 ? idea.comments_count : 'Comentar'}
               </button>
               {canDelete && (
                 <button

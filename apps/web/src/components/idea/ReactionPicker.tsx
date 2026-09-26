@@ -12,8 +12,14 @@ export interface Reactor {
 }
 
 export interface ReactionPickerProps {
-  counts: Record<Reaction, number>
-  myVote: Reaction | null
+  /**
+   * Opcional a proposito. Es un dato que viene de la base, y la base puede mandar
+   * una idea a medio hidratar: si `counts` faltara, `counts['🔥']` reventaba la
+   * app entera con "Cannot read properties of undefined". Con el default, el peor
+   * caso es que no se vea ningun contador.
+   */
+  counts?: Partial<Record<Reaction, number>> | null
+  myVote?: Reaction | null
   onVote: (reaction: Reaction) => void
   disabled?: boolean
   myUserId?: string
@@ -34,7 +40,7 @@ export function ReactionPicker({
     <div className="flex flex-wrap items-start gap-x-2 gap-y-3" role="group" aria-label="Reacciones">
       {REACTIONS.map(({ reaction, label }) => {
         const active = myVote === reaction
-        const count = counts[reaction]
+        const count = counts?.[reaction] ?? 0
         const users = (reactors?.[reaction] ?? []).slice(0, MAX_REACTORS)
         const overflow = (reactors?.[reaction]?.length ?? 0) - users.length
         const names = (reactors?.[reaction] ?? []).map((u) =>

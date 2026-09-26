@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router'
 import { Suspense, lazy, type ReactNode } from 'react'
 import { AppShell } from '@/components/layout/AppShell'
 import { LoadingState } from '@/components/feedback/LoadingState'
+import { RouteError } from '@/components/feedback/RouteError'
 import { RootLayout } from '@/routes/RootLayout'
 import { loaders } from '@/routes/lazyRoutes'
 
@@ -26,6 +27,9 @@ function load(node: ReactNode): ReactNode {
 
 export const router = createBrowserRouter([
   {
+    // Una sola vez y en la raiz: cualquier error de render de cualquier seccion cae
+    // aca, sin que cada pantalla tenga que protegerse sola.
+    errorElement: <RouteError />,
     element: <RootLayout />,
     children: [
       { path: '/', element: load(<UserSelector />) },

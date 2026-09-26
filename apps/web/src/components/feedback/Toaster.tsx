@@ -24,7 +24,7 @@ function ToastCard({ id, message, emoji, type }: { id: string; message: string; 
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, x: 40, scale: 0.95 }}
       transition={{ type: 'spring', damping: 24, stiffness: 380 }}
-      className={`pointer-events-auto flex items-center gap-2.5 rounded-2xl px-4 py-3 text-white shadow-card-lg ${styles[type]}`}
+      className={`pointer-events-auto flex items-center gap-2.5 rounded-2xl px-4 py-3 text-white shadow-card-lg ${styles[type] ?? styles.info}`}
     >
       {emoji && <span aria-hidden className="text-xl">{emoji}</span>}
       <p className="flex-1 font-display text-sm font-semibold">{message}</p>
