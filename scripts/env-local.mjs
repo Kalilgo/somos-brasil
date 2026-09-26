@@ -17,34 +17,52 @@ import { fileURLToPath } from 'node:url'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
 function status() {
-  try {
-    return execFileSync('supabase', ['status'], { encoding: 'utf8', cwd: root })
-  } catch {
-    console.error(
-      [
-        '',
-        '  No pude hablar con el stack local. Probablemente no este corriendo.',
-        '',
-        '    npm run db:start',
-        '',
-        '  (necesita Docker; si no lo tenes, instalalo con Docker Desktop)',
-        '',
-      ].join('\n'),
-    )
-    process.exit(1)
+  for (const args of [['status', '-o', 'env'], ['status']]) {
+    try {
+      return execFileSync('supabase', args, { encoding: 'utf8', cwd: root })
+    } catch {
+      /* probamos el siguiente */
+    }
   }
+  console.error(
+    [
+      '',
+      '  No pude hablar con el stack local. Probablemente no este corriendo.',
+      '',
+      '    npm run db:start',
+      '',
+      '  (necesita Docker; si no lo tenes, instalalo con Docker Desktop)',
+      '',
+    ].join('\n'),
+  )
+  process.exit(1)
 }
 
 const out = status()
-const field = (label) => {
-  const m = out.match(new RegExp(`${label}:\\s*(\\S+)`, 'i'))
-  return m?.[1]
+
+/**
+ * `supabase status -o env` imprime KEY=value y trae todo, incluido el JWT_SECRET,
+ * que la tabla con recuadros ya no muestra. Es el parseo que corresponde.
+ *
+ * Los nombres de las claves cambiaron a mitad de camino: la CLI 2.117+ usa
+ * PUBLISHABLE_KEY / SECRET_KEY donde antes era ANON_KEY / SERVICE_ROLE_KEY. Se
+ * aceptan los dos nombres.
+ */
+function field(...names) {
+  for (const name of names) {
+    const m = out.match(new RegExp(`^${name}=(.+)$`, 'm'))
+    const value = m?.[1]?.trim()
+    // `-o env` entrecomilla los valores para que el shell no los interprete.
+    if (value) return value.replace(/^["']|["']$/g, '')
+  }
+  return undefined
 }
 
-const apiUrl = field('API URL')
-const anonKey = field('anon key')
-const serviceKey = field('service_role key')
-const jwtSecret = field('JWT secret')
+const apiUrl = field('API_URL')
+const anonKey = field('PUBLISHABLE_KEY', 'ANON_KEY')
+const serviceKey = field('SECRET_KEY', 'SERVICE_ROLE_KEY')
+const jwtSecret = field('JWT_SECRET')
+const linkedRef = field('LINKED_PROJECT_REF')
 
 if (!apiUrl || !anonKey) {
   console.error(
@@ -113,8 +131,23 @@ if (existsSync(rootEnv)) {
   }
 }
 
-const studioUrl = apiUrl.replace(':54321', ':54323')
-const mailUrl = apiUrl.replace(':54321', ':54324')
+const studioUrl = field('STUDIO_URL') ?? apiUrl.replace(':54321', ':54323')
+const mailUrl = field('MAILPIT_URL', 'INBUCKET_URL') ?? apiUrl.replace(':54321', ':54324')
+
+if (linkedRef) {
+  console.warn(
+    [
+      '',
+      `  OJO: el stack local esta enlazado al proyecto de Supabase ${linkedRef}.`,
+      '  Eso no afecta a `npm run dev`, que ya va al 127.0.0.1, pero si un dia',
+      '  corres `supabase db push` o `npm run fn:deploy` SIN querer, esos comandos',
+      '  NO van a la base local: van a produccion.',
+      '',
+      '    supabase unlink      # deja de estar enlazado a produccion',
+      '',
+    ].join('\n'),
+  )
+}
 
 console.log(`
   Listo. La app va a pegarle al stack local:
