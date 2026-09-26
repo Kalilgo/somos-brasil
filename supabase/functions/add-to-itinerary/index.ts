@@ -97,7 +97,8 @@ export default {
       if (error.code === '23505') {
         return Response.json({ message: 'La idea ya está en el itinerario' }, { status: 409 })
       }
-      return Response.json({ message: error.message }, { status: 500 })
+      console.error('ait_insert_error', error.message)
+      return Response.json({ message: 'No se pudo agregar al itinerario.' }, { status: 500 })
     }
 
     return Response.json({ ok: true, item })

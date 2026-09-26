@@ -1,6 +1,7 @@
 // Edge Runtime type definitions
 import '@supabase/functions-js/edge-runtime.d.ts'
 import { withSupabase } from '@supabase/server'
+import { appUserIdFrom } from '../_shared/auth.ts'
 import { ipOf, rateAllowed } from '../_shared/rate.ts'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -90,7 +91,8 @@ export default {
       p_trip_id: trip_id,
     })
     if (rowsError) {
-      return Response.json({ message: rowsError.message }, { status: 500 })
+      console.error('leaderboard_rpc_error', rowsError.message)
+      return Response.json({ message: 'No se pudo calcular el ranking.' }, { status: 500 })
     }
 
     const [usersRes, badgesRes, earnedRes] = await Promise.all([
@@ -134,10 +136,24 @@ export default {
     }
 
     if (toInsert.length > 0) {
-      await ctx.supabaseAdmin.from('user_badges').upsert(toInsert, {
-        onConflict: 'user_id,badge_id',
-        ignoreDuplicates: true,
-      })
+      // Esta función es de lectura y es pública (cualquiera puede pedir el ranking de
+      // un trip_id), pero abajo escribe en user_badges. Que un endpoint sin sesión
+      // pueda escribir en la base es un primitivo de escritura que no debería existir:
+      // alcanza con pegarle al endpoint desde cualquier lado.
+      //
+      // El badge se calcula siempre (es idempotente y se muestra), pero la escritura
+      // solo corre con sesión válida. El costo es que un visitante sin PIN no persiste
+      // insignias nuevas; se guardan en el próximo pedido autenticado.
+      const caller = await appUserIdFrom(req)
+      if (!caller) {
+        console.warn('leaderboard: peticion sin sesion, no se persisten badges')
+      } else {
+        const { error: badgeError } = await ctx.supabaseAdmin.from('user_badges').upsert(toInsert, {
+          onConflict: 'user_id,badge_id',
+          ignoreDuplicates: true,
+        })
+        if (badgeError) console.error('leaderboard_badge_error', badgeError.message)
+      }
     }
 
     const badges = Array.from(earnedSet)

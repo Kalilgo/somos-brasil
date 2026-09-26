@@ -36,7 +36,8 @@ export default {
     const { data, error } = await ctx.supabaseAdmin.rpc('get_trip_summary', { p_trip_id: trip_id })
 
     if (error) {
-      return Response.json({ message: error.message }, { status: 500 })
+      console.error('summary_rpc_error', error.message)
+      return Response.json({ message: 'No se pudo calcular el resumen.' }, { status: 500 })
     }
 
     if (data.member_count === 0) {

@@ -1,21 +1,34 @@
-# Sistema de defensa (anti-bots / anti-abuso)
+# Sistema de defensa (anti-bots / anti-abuso / anti-vandalismo)
 
 Protección por capas para el proyecto Supabase. Todo lo que acá se describe ya está
-implementado en el código (migraciones 0012/0013, edge functions `login` y
-`member-actions`) o hay que activarlo a mano desde el dashboard de Supabase (Fase 0).
+implementado en el código (migraciones 0012/0013/**0015**, edge functions `login` y
+`member-actions`, `vercel.json`) o hay que activarlo a mano desde el dashboard de
+Supabase (Fase 0).
+
+> **La anon key es pública.** Viaja en el bundle que sirve Vercel; cualquiera la lee
+> desde las devtools. Todo el análisis de riesgo de este documento parte de ahí. No
+> tratarla nunca como un secreto ni como una barrera de seguridad.
 
 ---
 
 ## Modelo de amenazas
 
 1. **Borrado/vandalismo**: lo peor de todo. La anon key viaja en el bundle del frontend;
-   hoy cualquiera que abra la URL pública podía `DELETE` cualquier fila. (Se cerró: RLS
-   quedo en solo lectura para anon/authenticated, ver migración 0012.)
+   cualquiera que abriera la URL pública podía `DELETE` cualquier fila. (Se cerró: RLS
+   en solo lectura para anon/authenticated en la migración 0012, y en 0015 los grants
+   pasaron a ser `SELECT` solamente, con default fail-closed para tablas nuevas.)
 2. **Suplantación**: el `user_id` viajaba desde el cliente. Ahora la identidad sale de un
    JWT firmado emitido por el servidor tras validar el PIN del grupo (`app_user_id` claim).
 3. **Spam / costo**: scripts que crean ideas/comentarios/votos por miles o pegan a las
    edge functions. Se limitó con rate limiting por IP y por usuario (migración 0013).
 4. **Bloat de filas**: textos sin tope. Se agregaron límites de longitud por columna.
+5. **Borrado cruzado**: con el PIN de cualquiera, cualquier miembro podía borrar las ideas
+   de los demás. Ahora `delete_idea` solo lo permite a quien propuso la idea o a quien creó
+   el viaje, y el botón ni se muestra si no vas a poder borrarla.
+6. **Enumeración de la base**: los 500 devolvían `error.message` de Postgres, que incluye
+   nombres de tabla, columnas, constraints y tipos. Ahora se loguea server-side y al
+   cliente vuelve un mensaje genérico.
+7. **Lectura sin autenticar**: sigue abierta, es la deuda conocida (ver más abajo).
 
 ## Fase 0 — Ajustes del dashboard (manual, una vez por proyecto)
 
@@ -95,3 +108,39 @@ reintentar.
 - [ ] Dashboard: rate limits + CORS + desactivar Auth/Storage/GraphQL.
 - [ ] Setear `GROUP_PIN` y `JWT_SIGNING_SECRET` (ver arriba).
 - [ ] Cambiar el PIN y avisar al grupo cómo entrar (elegir card → escribir PIN).
+- [ ] Aplicar la migración `0015_endurecimiento.sql`:
+      `supabase db push` (o pegarla en el SQL Editor del dashboard).
+
+## Headers HTTP (vercel.json)
+
+Ya están: `Referrer-Policy`, `X-Content-Type-Options`, `X-Frame-Options`,
+`Permissions-Policy`, `Strict-Transport-Security` y `Content-Security-Policy`.
+
+La CSP es deliberadamente estricta: `script-src 'self'` (sin `unsafe-inline`, sin CDN),
+`object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`. `style-src` lleva
+`'unsafe-inline'` porque Tailwind y Motion usan estilos inline; los sinks de XSS pasan
+por `script-src`, que es el que se cierra. `connect-src` queda limitado a
+`https://*.supabase.co` y `wss://*.supabase.co`; `img-src https:` es necesario porque
+las ideas pueden traer una `image_url` externa.
+
+## Deuda de seguridad conocida — la lectura sigue abierta
+
+Con la anon key (pública) cualquiera puede **leer** la base entera por el Data API:
+RLS tiene `using (true)` en las lecturas. Incluye datos personales: nombres de los
+integrantes, fechas de viaje y `location` de cada persona, ideas, votos y comentarios.
+
+**Por qué no se cierra todavía:** RLS necesita saber quién llama, y Postgres no lo
+sabe. La identidad vive en un PIN que valida una edge function, no en Supabase Auth, así
+que no hay `auth.uid()` y las policies solo pueden ser todo-o-nada. Ya se intentó mandar
+el JWT propio como `Authorization` global: PostgREST lo rechaza con 401 porque valida
+la firma contra el JWT secret del proyecto, que es otro. En un header custom tampoco,
+porque la allow-list de CORS de `withSupabase` es fija.
+
+**Cómo se cierra:** migrando la identidad a Supabase Auth (ADR-005). Cada usuario con su
+propio secreto —deja de ser un PIN compartido que compromete a los 6 si se filtra—,
+`auth.uid()` funciona, RLS pasa a ser expresivo y las edge functions pueden pasar a
+`auth: 'user'`.
+
+**Mitigaciones mientras tanto:** Fase 0 del dashboard (rate limits por IP) y que los
+datos que exponen no sean de alto valor. Si alguna vez se guardan documentos, direcciones
+exactas o datos de salud, esto deja de ser aceptable.

@@ -10,6 +10,15 @@ const REACTIONS = new Set(['🔥', '❤️', '😐', '🙅'])
 const URL_RE = /^https?:\/\//i
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
+// Los mensajes de error de Postgres filtran nombres de tabla, columnas, constraints y
+// tipos: es un mapa gratis de la base para cualquiera que llame la funcion. Se loguea
+// server-side (los logs de Supabase son privados) y al cliente se le devuelve un
+// mensaje generico.
+function dbFail(error: { message: string; code?: string } | null) {
+  console.error('db_error', error?.code ?? '????', error?.message ?? 'sin mensaje')
+  return Response.json({ message: 'No se pudo completar la operacion.' }, { status: 500 })
+}
+
 const json = (status: number, body: unknown) => Response.json(body, { status })
 
 async function isMemberOf(client: any, tripId: string, userId: string): Promise<boolean> {
@@ -96,11 +105,14 @@ export default {
             })
             .select()
             .single()
-          if (error) return json(error.code === '23505' ? 409 : 500, { message: error.message })
+          if (error) {
+            if (error.code === '23505') return json(409, { message: 'Ya existe un viaje con ese nombre.' })
+            return dbFail(error)
+          }
           const { error: mErr } = await A
             .from('trip_members')
             .insert(ids.map((memberId: string) => ({ trip_id: trip.id, user_id: memberId })))
-          if (mErr) return json(500, { message: mErr.message })
+          if (mErr) return dbFail(mErr)
           return json(200, { ok: true, trip })
         }
 
@@ -125,7 +137,9 @@ export default {
                 if (typeof v !== 'string' || !CURRENCIES.has(v)) return json(400, { message: 'Moneda inválida.' })
                 patch.currency = v
               } else if (k === 'start_date' || k === 'end_date') {
-                patch[k] = v ?? null
+                // Antes pasaba `v ?? null` sin validar: un objeto o un array llegaban
+                // tal cual a la columna date. Se normaliza a string YYYY-MM-DD o null.
+                patch[k] = typeof v === 'string' && DATE_RE.test(v) ? v : null
               }
             }
             if (!validDateRange(patch.start_date, patch.end_date)) {
@@ -133,7 +147,7 @@ export default {
             }
           }
           const { data: trip, error } = await A.from('trips').update(patch).eq('id', tripId).select().single()
-          if (error) return json(500, { message: error.message })
+          if (error) return dbFail(error)
           return json(200, { ok: true, trip })
         }
 
@@ -164,7 +178,7 @@ export default {
             .eq('user_id', userId)
             .select('user_id, arrival_date, departure_date, location')
             .single()
-          if (error) return json(500, { message: error.message })
+          if (error) return dbFail(error)
           return json(200, { ok: true, plan })
         }
 
@@ -215,7 +229,7 @@ export default {
             })
             .select()
             .single()
-          if (error) return json(500, { message: error.message })
+          if (error) return dbFail(error)
           return json(200, { ok: true, idea })
         }
 
@@ -232,20 +246,40 @@ export default {
             return json(403, { message: 'No sos parte de este viaje.' })
           }
           const { data: updated, error } = await A.from('ideas').update({ status }).eq('id', ideaId).select().single()
-          if (error) return json(500, { message: error.message })
+          if (error) return dbFail(error)
           return json(200, { ok: true, idea: updated })
         }
 
         case 'delete_idea': {
           const ideaId = body.idea_id as string
-          if (typeof ideaId !== 'string') return json(400, { message: 'idea_id inválido' })
-          const { data: idea } = await A.from('ideas').select('trip_id').eq('id', ideaId).maybeSingle()
+          if (typeof ideaId !== 'string' || !UUID_RE.test(ideaId)) {
+            return json(400, { message: 'idea_id inválido' })
+          }
+          const { data: idea } = await A
+            .from('ideas')
+            .select('trip_id, user_id')
+            .eq('id', ideaId)
+            .maybeSingle()
           if (!idea) return json(404, { message: 'La idea no existe' })
           if (!(await isMemberOf(A, idea.trip_id, userId))) {
             return json(403, { message: 'No sos parte de este viaje.' })
           }
+          // Borrar es destructivo e irreversible. Antes bastaba ser miembro del viaje
+          // para borrar la idea de cualquiera, así que un miembro (o alguien con el
+          // PIN filtrado) podía vaciar el tablero entero. Ahora solo borra quien la
+          // propuso o quien creó el viaje.
+          if (idea.user_id !== userId) {
+            const { data: trip } = await A
+              .from('trips')
+              .select('created_by')
+              .eq('id', idea.trip_id)
+              .maybeSingle()
+            if (trip?.created_by !== userId) {
+              return json(403, { message: 'Solo podés borrar tus propias ideas.' })
+            }
+          }
           const { error } = await A.from('ideas').delete().eq('id', ideaId)
-          if (error) return json(500, { message: error.message })
+          if (error) return json(500, { message: 'No se pudo borrar la idea.' })
           return json(200, { ok: true })
         }
 
@@ -269,10 +303,10 @@ export default {
             const { error } = await A
               .from('votes')
               .upsert({ idea_id: ideaId, user_id: userId, reaction: body.reaction }, { onConflict: 'idea_id,user_id' })
-            if (error) return json(500, { message: error.message })
+            if (error) return dbFail(error)
           } else {
             const { error } = await A.from('votes').delete().eq('idea_id', ideaId).eq('user_id', userId)
-            if (error) return json(500, { message: error.message })
+            if (error) return dbFail(error)
           }
           return json(200, { ok: true })
         }
@@ -298,7 +332,7 @@ export default {
             .insert({ idea_id: ideaId, user_id: userId, body: text })
             .select()
             .single()
-          if (error) return json(500, { message: error.message })
+          if (error) return dbFail(error)
           return json(200, { ok: true, comment })
         }
 
@@ -341,7 +375,7 @@ export default {
             .single()
           if (error) {
             if (error.code === '23505') return json(409, { message: 'La idea ya está en el itinerario' })
-            return json(500, { message: error.message })
+            return dbFail(error)
           }
           return json(200, { ok: true, item })
         }
@@ -355,7 +389,7 @@ export default {
             return json(403, { message: 'No sos parte de este viaje.' })
           }
           const { error } = await A.from('itinerary_items').delete().eq('id', itemId)
-          if (error) return json(500, { message: error.message })
+          if (error) return dbFail(error)
           return json(200, { ok: true })
         }
 
@@ -376,7 +410,7 @@ export default {
             .from('itinerary_items')
             .update({ day_number: dayNumber, sort_order: sortOrder })
             .eq('id', itemId)
-          if (error) return json(500, { message: error.message })
+          if (error) return dbFail(error)
           return json(200, { ok: true })
         }
 
@@ -395,7 +429,7 @@ export default {
             { user_id: userId, endpoint, p256dh, auth: authKey, updated_at: new Date().toISOString() },
             { onConflict: 'endpoint' },
           )
-          if (error) return json(500, { message: error.message })
+          if (error) return dbFail(error)
           return json(200, { ok: true })
         }
 
@@ -407,7 +441,7 @@ export default {
             .delete()
             .eq('user_id', userId)
             .eq('endpoint', endpoint)
-          if (error) return json(500, { message: error.message })
+          if (error) return dbFail(error)
           return json(200, { ok: true })
         }
 

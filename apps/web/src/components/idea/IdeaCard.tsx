@@ -12,6 +12,7 @@ import { AddToItineraryModal } from '@/components/itinerary/AddToItineraryModal'
 import { fireMiniConfetti } from '@/components/feedback/Confetti'
 import { useIdeasStore } from '@/lib/state/ideas'
 import { useAuthStore } from '@/lib/state/auth'
+import { useTripsStore } from '@/lib/state/trips'
 import { toastError, toastSuccess } from '@/lib/state/toasts'
 import { priceLabel, timeAgo } from '@/lib/utils/format'
 import { IDEA_STATUSES, REACTIONS } from '@/lib/utils/constants'
@@ -22,6 +23,12 @@ export function IdeaCard({ idea, members }: { idea: IdeaWithRelations; members?:
   const changeStatus = useIdeasStore((s) => s.changeStatus)
   const removeIdea = useIdeasStore((s) => s.removeIdea)
   const myUserId = useAuthStore((s) => s.currentUser?.id)
+  const tripCreatorId = useTripsStore((s) => s.currentTrip?.created_by)
+
+  // El servidor solo deja borrar la idea a quien la propuso o a quien creó el viaje
+  // (member-actions → delete_idea). Si el botón apareciera igual, el grupo vería un
+  // botón que siempre responde 403: mejor ni mostrarlo.
+  const canDelete = Boolean(myUserId) && (idea.user_id === myUserId || tripCreatorId === myUserId)
 
   const [commentsOpen, setCommentsOpen] = useState(false)
   const [confirmStatus, setConfirmStatus] = useState<IdeaStatus | null>(null)
@@ -170,13 +177,15 @@ export function IdeaCard({ idea, members }: { idea: IdeaWithRelations; members?:
               >
                 💬 {idea.comments_count > 0 ? idea.comments_count : 'Comentar'}
               </button>
-              <button
-                onClick={() => setPendingDelete(true)}
-                aria-label="Eliminar idea"
-                className="rounded-full p-2 text-ink-soft transition-colors hover:bg-danger/10 hover:text-danger focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:outline-none"
-              >
-                🗑️
-              </button>
+              {canDelete && (
+                <button
+                  onClick={() => setPendingDelete(true)}
+                  aria-label="Eliminar idea"
+                  className="rounded-full p-2 text-ink-soft transition-colors hover:bg-danger/10 hover:text-danger focus-visible:ring-2 focus-visible:ring-danger/50 focus-visible:outline-none"
+                >
+                  🗑️
+                </button>
+              )}
             </div>
           </div>
 
