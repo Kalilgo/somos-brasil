@@ -17,6 +17,7 @@
     "env:local": "node scripts/env-local.mjs",
     "fn:local": "supabase functions serve --env-file supabase/functions/.env",
     "doctor": "node scripts/doctor.mjs",
+    "heartbeat": "node scripts/heartbeat.mjs",
     "deploy": "node scripts/deploy.mjs"
   }
 }

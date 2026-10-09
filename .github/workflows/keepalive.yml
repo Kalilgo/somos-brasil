@@ -1,25 +1,23 @@
 name: Supabase keep-alive
 
-# Evita que Supabase pause el proyecto Free por inactividad.
-# Hace una query real (SELECT) a una tabla legible por anon, todos los dias.
+# Mantiene despierto el proyecto Free de Supabase y, si lo agarra pausado, lo
+# despierta solo (Management API /restore). Corre 2 veces por dia.
 # Ver docs/ANTI_PAUSA_SUPABASE.md
 
 on:
   schedule:
-    - cron: '17 9 * * *'
+    - cron: '17 9,21 * * *'
   workflow_dispatch:
 
 jobs:
-  ping:
+  heartbeat:
     runs-on: ubuntu-latest
     steps:
-      - name: Latido contra la base
+      - uses: actions/checkout@v4
+      - name: Latido + auto-restore
         env:
-          URL: ${{ secrets.SUPABASE_URL || 'https://qcxxxzkghpacmrzmeqju.supabase.co' }}
-          ANON: ${{ secrets.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjeHh4emtnaHBhY21yem1lcWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNzg5NjIsImV4cCI6MjEwNTY1NDk2Mn0.y6IskmRHZ5oE8cD7apfIHyJNYQm8YLajOvZhoHlt9YQ' }}
-        run: |
-          code=$(curl -sS -o /dev/null -w '%{http_code}' \
-            "$URL/rest/v1/categories?select=id&limit=1" \
-            -H "apikey: $ANON" -H "Authorization: Bearer $ANON")
-          echo "HTTP $code"
-          test "$code" = "200"
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://qcxxxzkghpacmrzmeqju.supabase.co' }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjeHh4emtnaHBhY21yem1lcWp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNzg5NjIsImV4cCI6MjEwNTY1NDk2Mn0.y6IskmRHZ5oE8cD7apfIHyJNYQm8YLajOvZhoHlt9YQ' }}
+          SUPABASE_PROJECT_REF: 'qcxxxzkghpacmrzmeqju'
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: node scripts/heartbeat.mjs
