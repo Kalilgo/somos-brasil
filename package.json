@@ -10,6 +10,7 @@
     "build": "npm run build -w @somos-brasil/web",
     "lint": "npm run lint -w @somos-brasil/web",
     "typecheck": "npm run typecheck -w @somos-brasil/web",
+    "test": "npm run test -w @somos-brasil/web",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
